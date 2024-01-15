@@ -1,0 +1,6 @@
+
+.idea/
+
+# Cmake build files
+cmake-build-debug/
+cmake-build-release/
