@@ -22,67 +22,109 @@ using namespace glm;
 
 const float EPS = 1e-5f;
 
-const int MAX_PATHS = 2; // 32
-const int MAX_BOUNCE = 2; // 4
+const int MAX_PATHS = 1; // 32
+const int MAX_BOUNCE = 4; // 4
+const int SEED = 127;
+
+enum struct SampleDimension : uint32_t {
+    ePixelX,
+    ePixelY,
+    eLightId,
+    eLightPointX,
+    eLightPointY,
+    eBSDF0,
+    eBSDF1,
+    eBSDF2,
+    eBSDF3,
+    eRussianRoulette,
+    eNUM_DIMENSIONS
+};
+
+struct SamplerState {
+    uint32_t seed;
+    uint32_t sampleIdx;
+    uint32_t depth = 4;
+};
+
+static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixelSampleIndex, uint32_t seed) {
+    SamplerState sampler{};
+    sampler.seed = seed;
+    sampler.sampleIdx = pixelSampleIndex;
+    return sampler;
+}
+
+template<SampleDimension Dim>
+float random(SamplerState &state) {
+//    const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
+//    const uint32_t base = primeNumbers[dimension & 31u];
+//    return halton(state.seed + state.sampleIdx, base); // could be random from std
+
+    static std::linear_congruential_engine<uint32_t, 48271, uint32_t(Dim), 2147483647> generator(state.seed);
+    static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+    ++state.sampleIdx;
+
+    return distribution(generator);
+}
 
 enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder
 };
 random_generator random_generator_type = LinearCongruential;
 
-float getRandom() {
-
-    std::student_t_distribution<float> distribution(1.0);
-    switch (random_generator_type) {
-
-        case LinearCongruential: { // Newer "Minimum standard", recommended by Park, Miller, and Stockmeyer in 1993
-            static std::linear_congruential_engine<std::uint_fast32_t, 48271, 0, 2147483647> generator;
-            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-
-            return distribution(generator);
-        }
-
-        case MersenneTwister: { // 64-bit Mersenne Twister by Matsumoto and Nishimura, 2000
-            static std::mersenne_twister_engine<std::uint_fast64_t, 64, 312, 156, 31,
-                    0xb5026f5aa96619e9, 29, 0x5555555555555555, 17, 0x71d67fffeda60000, 37,
-                    0xfff7eee000000000, 43, 6364136223846793005> generator;
-            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-
-            return distribution(generator);
-        }
-
-        case SubtractWithCarry: {
-            static std::subtract_with_carry_engine<std::uint_fast64_t, 48, 5, 12> generator;
-            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-
-            return distribution(generator);
-        }
-
-        case ShuffleOrder: {
-            static std::shuffle_order_engine<std::minstd_rand, 256> generator;
-            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-
-            return distribution(generator);
-        }
-
-        default: {
-            static std::default_random_engine generator;
-            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-
-            return distribution(generator);
-        }
-    }
-}
+//float getRandom() {
+//
+//    switch (random_generator_type) {
+//
+//        case LinearCongruential: { // Newer "Minimum standard", recommended by Park, Miller, and Stockmeyer in 1993
+//            static std::linear_congruential_engine<std::uint_fast32_t, 48271, 0, 2147483647> generator;
+//            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+//
+//            return distribution(generator);
+//        }
+//
+//        case MersenneTwister: { // 64-bit Mersenne Twister by Matsumoto and Nishimura, 2000
+//            static std::mersenne_twister_engine<std::uint_fast64_t, 64, 312, 156, 31,
+//                    0xb5026f5aa96619e9, 29, 0x5555555555555555, 17, 0x71d67fffeda60000, 37,
+//                    0xfff7eee000000000, 43, 6364136223846793005> generator;
+//            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+//
+//            return distribution(generator);
+//        }
+//
+//        case SubtractWithCarry: {
+//            static std::subtract_with_carry_engine<std::uint_fast64_t, 48, 5, 12> generator;
+//            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+//
+//            return distribution(generator);
+//        }
+//
+//        case ShuffleOrder: {
+//            static std::shuffle_order_engine<std::minstd_rand, 256> generator;
+//            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+//
+//            return distribution(generator);
+//        }
+//
+//        default: {
+//            static std::default_random_engine generator;
+//            static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+//
+//            return distribution(generator);
+//        }
+//    }
+//}
 
 struct Ray {
     vec4 o;
     vec4 d;
 };
 
-vec3 random_in_unit_disk() {
+vec3 random_in_unit_disk(SamplerState &currentState) {
+
     vec3 p;
     do {
-        p = 2.0f * vec3(getRandom(), getRandom(), 0) - vec3(1, 1, 0);
+        p = 2.0f * vec3(random<SampleDimension::eRussianRoulette>(currentState),
+                        random<SampleDimension::eRussianRoulette>(currentState), 0) - vec3(1, 1, 0);
     } while (dot(p, p) >= 1.0);
     return p;
 }
@@ -104,8 +146,8 @@ public:
         vertical = 2 * half_height * focus_dist * v;
     }
 
-    Ray get_ray(const float s, const float t) const {
-        vec3 rd = lens_radius * random_in_unit_disk();
+    Ray get_ray(const float s, const float t, SamplerState &currentState) const {
+        vec3 rd = lens_radius * random_in_unit_disk(currentState);
         vec3 offset = u * rd.x + v * rd.y;
         Ray ray;
         ray.o = vec4(origin + offset, 1.0);
@@ -197,22 +239,35 @@ struct Triangle {
     }
 };
 
-int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const Camera &cam, int width, int height) {
+int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const Camera &cam, int width, int height,
+                       std::vector<SamplerState> &raysStates) {
     const int numRays = width * height;
     rays.reserve(numRays);
     pixCoord.reserve(numRays);
+
+    bool makeStates = false;
+    if (raysStates.empty()) {
+        raysStates.reserve(numRays);
+        makeStates = true;
+    }
+
     // Y
     // ^
     // |
     // O---> X
     for (int h = height - 1; h >= 0; --h) {
         for (int w = 0; w < width; ++w) {
-            float u = float(w + getRandom()) / float(width);
-            float v = float(h + getRandom()) / float(height);
-            // float u = float(w) / float(width);
-            // float v = float(h) / float(height);
+            if (makeStates) {
+                raysStates[h * width + w] = initSampler(h * width + w, 0, SEED);
+            } else {
+                ++raysStates[h * width + w].sampleIdx;
+            }
+            SamplerState &currentState = raysStates[h * width + w];
 
-            Ray r = cam.get_ray(u, v);
+            float u = float(w + random<SampleDimension::ePixelX>(currentState)) / float(width);
+            float v = float(h + random<SampleDimension::ePixelY>(currentState)) / float(height);
+
+            Ray r = cam.get_ray(u, v, currentState);
             rays.push_back(r);
             pixCoord.push_back(h * width + w);
         }
@@ -288,10 +343,12 @@ vec3 hemisphereSampleCosine(const vec2 &uv) {
 }
 
 int main() {
-    std::cout << "Ok\n";
+    std::cout << "Started\n";
 
     int width = 320;
     int height = 240;
+//    int width = 1440;
+//    int height = 1080;
 
     std::string modelPath = "assets/CornellBox-Original.obj";
     std::string materialPath = "assets/";
@@ -439,12 +496,15 @@ int main() {
     std::vector<uint8_t> pixels(numPixels * 4);
     std::vector<vec4> colors(numPixels, vec4(0.0f));
     for (int path = 0; path < MAX_PATHS; ++path) {
+
+        std::vector<SamplerState> raysStates;
+
         std::clog << "\rPaths left: " << MAX_PATHS - path << "    " << std::flush;
         // generate primary rays
         std::vector<std::vector<Ray>> raysBuffers(2);
         std::vector<std::vector<int>> pixelCoordBuffers(2); // stores pixel coord as int: (h * width + w)
         std::vector<std::vector<vec3>> pathWeightBuffers(2);
-        int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, width, height);
+        int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, width, height, raysStates);
         pathWeightBuffers[0].resize(numRays);
         pathWeightBuffers[0].assign(numRays, vec3{1.0f});
         for (int bounce = 0; bounce < MAX_BOUNCE; ++bounce) {
@@ -519,8 +579,8 @@ int main() {
                         const vec3 nLB = world.normals[indexLB];
                         const vec3 nLC = world.normals[indexLC];
 
-                        float r0 = float(getRandom());
-                        float r1 = float(getRandom());
+                        float r0 = random<SampleDimension::eLightPointX>(raysStates[i]);
+                        float r1 = random<SampleDimension::eLightPointY>(raysStates[i]);
                         vec2 luv(1.0f - sqrtf(r0), sqrtf(r0) * r1);
                         // if (luv.x + luv.y >= 1.0)
                         // {
@@ -595,7 +655,8 @@ int main() {
 
                     // uint sampleIndex = i * 16384 + (rnd & 16383);
                     // vec2 uv = hammersley2d(sampleIndex, 16384 * RAY_NUM);
-                    vec2 uv{getRandom(), getRandom()};
+                    vec2 uv{random<SampleDimension::ePixelX>(raysStates[i]),
+                            random<SampleDimension::ePixelY>(raysStates[i])};
 
                     //vec3 rndDirection = hemisphereSampleUniform(uv);
                     vec3 rndDirection = hemisphereSampleCosine(uv);
@@ -641,7 +702,7 @@ int main() {
         pixels[h * (width * 4) + (w * 4) + 2] = std::min(255, std::max(0, b));
         pixels[h * (width * 4) + (w * 4) + 3] = 255;
     }
-    std::string outputFileName = "../Results/";
+    std::string outputFileName = "../ResultsWithNewInterface/";
     outputFileName += std::to_string(MAX_PATHS) + '_';
     outputFileName += std::to_string(MAX_BOUNCE) + '_';
     switch (random_generator_type) {
@@ -660,8 +721,8 @@ int main() {
         default:
             outputFileName += "Default";
     }
-    outputFileName += ".png";
-    int res = stbi_write_png(outputFileName.c_str(), width, height, 4, pixels.data(), 0);
+    outputFileName += "New.png";
+    stbi_write_png(outputFileName.c_str(), width, height, 4, pixels.data(), 0);
 
     return 0;
 }
