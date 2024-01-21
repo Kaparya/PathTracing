@@ -6,12 +6,13 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
-
 #include <glm/glm.hpp>
+
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <stb_image_write.h>
+
 
 #define TINYOBJLOADER_IMPLEMENTATION
 
@@ -21,8 +22,8 @@ using namespace glm;
 
 const float EPS = 1e-5f;
 
-const int MAX_PATHS = 1000; // 32
-const int MAX_BOUNCE = 100; // 4
+const int MAX_PATHS = 2; // 32
+const int MAX_BOUNCE = 2; // 4
 
 enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder
@@ -640,7 +641,7 @@ int main() {
         pixels[h * (width * 4) + (w * 4) + 2] = std::min(255, std::max(0, b));
         pixels[h * (width * 4) + (w * 4) + 3] = 255;
     }
-    std::string outputFileName = "Results/";
+    std::string outputFileName = "../Results/";
     outputFileName += std::to_string(MAX_PATHS) + '_';
     outputFileName += std::to_string(MAX_BOUNCE) + '_';
     switch (random_generator_type) {
