@@ -1,7 +1,8 @@
 #include <vector>
 #include <chrono>
 #include <iostream>
-#include <random>
+
+#include "ourRandom.hpp"
 
 #define _USE_MATH_DEFINES
 
@@ -24,92 +25,6 @@ const float EPS = 1e-5f;
 
 const int MAX_PATHS = 32; // 32
 const int MAX_BOUNCE = 4; // 4
-const int SEED = 0;
-
-const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79,
-                                   83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
-
-enum random_generator {
-    Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder, Halton, Sobol
-};
-random_generator random_generator_type = Sobol;
-
-enum struct SampleDimension : uint32_t {
-    ePixelX,
-    ePixelY,
-    eLightId,
-    eLightPointX,
-    eLightPointY,
-    eBSDF0,
-    eBSDF1,
-    eBSDF2,
-    eBSDF3,
-    eRussianRoulette,
-    eNUM_DIMENSIONS
-};
-
-struct SamplerState {
-    uint32_t seed;
-    uint32_t sampleIdx;
-    uint32_t depth = 0;
-};
-
-static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixelSampleIndex, uint32_t seed) {
-    SamplerState sampler{};
-    sampler.seed = seed;
-    sampler.sampleIdx = pixelSampleIndex;
-    return sampler;
-}
-
-float HaltonRand(uint32_t index, const uint32_t base) {
-    float f = 1;
-    float result = 0;
-
-    while (std::fabs(index) > 1e-6) {
-        f = f / float(base);
-        result = result + f * float(index % base);
-        index /= base;
-    }
-
-    return result;
-}
-
-float SobolRandom(uint32_t& prev_x, uint32_t &cur_index) {
-
-    ++cur_index;
-
-    uint32_t c_now = 1;
-    unsigned value = cur_index;
-    while (value & 1) {
-        value >>= 1;
-        ++c_now;
-    }
-
-    prev_x = prev_x ^ (1 << (32 - c_now));
-    return (float) prev_x / pow(2, 32);
-}
-
-template<SampleDimension Dim>
-float random(SamplerState &state) {
-    if (random_generator_type == Halton) {
-        const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
-        const uint32_t base = primeNumbers[dimension & 31u];
-        ++state.depth;
-        if (HaltonRand(state.seed + state.sampleIdx, base) > 1 || HaltonRand(state.seed + state.sampleIdx, base) < 0) {
-            std::cerr << "\n\nERROR\n\n";
-            return 0;
-        }
-        return HaltonRand(state.seed + state.sampleIdx, base); // could be random from std
-    } else if (random_generator_type == Sobol) {
-        return SobolRandom(state.seed, state.depth);
-    }
-
-    static std::linear_congruential_engine<uint32_t, 48271, uint32_t(Dim), 2147483647> generator(state.seed + state.sampleIdx + state.depth * MAX_PATHS);
-    static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-    ++state.depth;
-
-    return distribution(generator);
-}
 
 struct Ray {
     vec4 o;
@@ -349,6 +264,8 @@ int main() {
 
     std::string modelPath = "../assets/CornellBox-Original.obj";
     std::string materialPath = "../assets/";
+//    std::string modelPath = "../assets/box/cube.obj";
+//    std::string materialPath = "../assets/box/";
 
     // std::string filename = "./media/CornellBox/CornellBox-Empty-RG.obj";
     // std::string filename = "./media/CornellBox/CornellBox-Sphere.obj";
@@ -700,7 +617,7 @@ int main() {
         pixels[h * (width * 4) + (w * 4) + 2] = std::min(255, std::max(0, b));
         pixels[h * (width * 4) + (w * 4) + 3] = 255;
     }
-    std::string outputFileName = "../ResultsWithNewInterface/Sobol/";
+    std::string outputFileName = "../ResultsWithNewInterface/Halton/";
     outputFileName += std::to_string(MAX_PATHS) + '_';
     outputFileName += std::to_string(MAX_BOUNCE) + ".png";
     stbi_write_png(outputFileName.c_str(), width, height, 4, pixels.data(), 0);
