@@ -1,6 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include "glm/glm.hpp"
+
+using namespace glm;
 
 extern const int MAX_PATHS;
 extern const int MAX_BOUNCE;
@@ -42,7 +45,7 @@ inline float HaltonRand(uint32_t value, const uint32_t base) {
     float cur_pow = 1;
     float result = 0;
 
-    while (std::fabs(value) > 1e-6) {
+    while (value > 0) {
         cur_pow = cur_pow / float(base);
         result = result + cur_pow * float(value % base);
         value /= base;
@@ -77,7 +80,7 @@ inline float random(SamplerState &state) {
         const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
         const uint32_t base = primeNumbers[dimension & 31u];
         ++state.depth;
-        return HaltonRand(state.seed + state.sampleIdx, base);
+        return HaltonRand(state.seed + state.sampleIdx + state.depth * MAX_PATHS, base);
     } else if (random_generator_type == Sobol) {
         return SobolRandom(state.seed, state.depth);
     }
@@ -88,4 +91,14 @@ inline float random(SamplerState &state) {
 //    ++state.depth;
 
     return 1;
+}
+
+vec3 random_in_unit_disk(SamplerState &currentState) {
+
+    vec3 p;
+    do {
+        p = 2.0f * vec3(random<SampleDimension::eRussianRoulette>(currentState),
+                        random<SampleDimension::eRussianRoulette>(currentState), 0) - vec3(1, 1, 0);
+    } while (dot(p, p) >= 1.0);
+    return p;
 }

@@ -9,7 +9,6 @@
 #include <cmath>
 #include <glm/glm.hpp>
 
-
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <stb_image_write.h>
@@ -23,23 +22,13 @@ using namespace glm;
 
 const float EPS = 1e-5f;
 
-const int MAX_PATHS = 32; // 32
-const int MAX_BOUNCE = 4; // 4
+const int MAX_PATHS = 1000; // 32
+const int MAX_BOUNCE = 100; // 4
 
 struct Ray {
     vec4 o;
     vec4 d;
 };
-
-vec3 random_in_unit_disk(SamplerState &currentState) {
-
-    vec3 p;
-    do {
-        p = 2.0f * vec3(random<SampleDimension::eRussianRoulette>(currentState),
-                        random<SampleDimension::eRussianRoulette>(currentState), 0) - vec3(1, 1, 0);
-    } while (dot(p, p) >= 1.0);
-    return p;
-}
 
 class Camera {
 public:
@@ -152,7 +141,7 @@ struct Triangle {
 };
 
 int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const Camera &cam, int width, int height,
-                       std::vector<SamplerState> &raysStates) {
+                       std::vector<SamplerState> &raysStates, const int path) {
     const int numRays = width * height;
     rays.reserve(numRays);
     pixCoord.reserve(numRays);
@@ -170,7 +159,7 @@ int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const
     for (int h = height - 1; h >= 0; --h) {
         for (int w = 0; w < width; ++w) {
             if (makeStates) {
-                raysStates[h * width + w] = initSampler(h * width + w, 0, SEED);
+                raysStates[h * width + w] = initSampler(h * width + w, path, SEED); // изменить на path
             } else {
                 ++raysStates[h * width + w].sampleIdx;
             }
@@ -419,7 +408,7 @@ int main() {
         std::vector<std::vector<Ray>> raysBuffers(2);
         std::vector<std::vector<int>> pixelCoordBuffers(2); // stores pixel coord as int: (h * width + w)
         std::vector<std::vector<vec3>> pathWeightBuffers(2);
-        int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, width, height, raysStates);
+        int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, width, height, raysStates, path);
         pathWeightBuffers[0].resize(numRays);
         pathWeightBuffers[0].assign(numRays, vec3{1.0f});
         for (int bounce = 0; bounce < MAX_BOUNCE; ++bounce) {
