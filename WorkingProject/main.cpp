@@ -18,12 +18,13 @@
 
 #include <tiny_obj_loader.h>
 
+
 using namespace glm;
 
 const float EPS = 1e-5f;
 
-const int MAX_PATHS = 1000; // 32
-const int MAX_BOUNCE = 100; // 4
+const int MAX_PATHS = 32; // 32
+const int MAX_BOUNCE = 4; // 4
 
 struct Ray {
     vec4 o;
@@ -146,11 +147,7 @@ int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const
     rays.reserve(numRays);
     pixCoord.reserve(numRays);
 
-    bool makeStates = false;
-    if (raysStates.empty()) {
-        raysStates.reserve(numRays);
-        makeStates = true;
-    }
+    raysStates.resize(numRays);
 
     // Y
     // ^
@@ -158,11 +155,8 @@ int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const
     // O---> X
     for (int h = height - 1; h >= 0; --h) {
         for (int w = 0; w < width; ++w) {
-            if (makeStates) {
-                raysStates[h * width + w] = initSampler(h * width + w, path, SEED); // изменить на path
-            } else {
-                ++raysStates[h * width + w].sampleIdx;
-            }
+            raysStates[h * width + w] = initSampler(h * width + w, path, SEED);
+
             SamplerState &currentState = raysStates[h * width + w];
 
             float u = float(w + random<SampleDimension::ePixelX>(currentState)) / float(width);
@@ -399,15 +393,17 @@ int main() {
     std::vector<uint8_t> pixels(numPixels * 4);
     std::vector<vec4> colors(numPixels, vec4(0.0f));
 
-    std::vector<SamplerState> raysStates;
-
     for (int path = 0; path < MAX_PATHS; ++path) {
 
         std::clog << "\rPaths left: " << MAX_PATHS - path << "    " << std::flush;
+
         // generate primary rays
         std::vector<std::vector<Ray>> raysBuffers(2);
         std::vector<std::vector<int>> pixelCoordBuffers(2); // stores pixel coord as int: (h * width + w)
         std::vector<std::vector<vec3>> pathWeightBuffers(2);
+
+        std::vector<SamplerState> raysStates;
+
         int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, width, height, raysStates, path);
         pathWeightBuffers[0].resize(numRays);
         pathWeightBuffers[0].assign(numRays, vec3{1.0f});
@@ -432,6 +428,8 @@ int main() {
             // eval material
             for (int i = 0; i < numRays; ++i) {
                 if (isecs[i].shapeId == 1) {
+                    ++raysStates[i].depth;
+
                     const int h = height - 1 - pixelCoordBuffers[currentBufferId][i] / width;
                     const int w = pixelCoordBuffers[currentBufferId][i] % width;
 
@@ -534,6 +532,8 @@ int main() {
             pathWeightBuffers[nextBufferId].clear();
             for (int i = 0; i < numRays; ++i) {
                 if (isecs[i].shapeId == 1) {
+                    ++raysStates[i].depth;
+
                     const int indexA = world.indices[isecs[i].primitiveId];
                     const int indexB = world.indices[isecs[i].primitiveId + 1];
                     const int indexC = world.indices[isecs[i].primitiveId + 2];

@@ -1,13 +1,14 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include "glm/glm.hpp"
 
 using namespace glm;
 
 extern const int MAX_PATHS;
 extern const int MAX_BOUNCE;
-const int SEED = 137;
+const uint32_t SEED = 137;
 
 enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder, Halton, Sobol
@@ -32,6 +33,7 @@ struct SamplerState {
     uint32_t seed;
     uint32_t sampleIdx;
     uint32_t depth = 0;
+    uint32_t now = 0;
 };
 
 inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixelSampleIndex, uint32_t seed) {
@@ -50,6 +52,8 @@ inline float HaltonRand(uint32_t value, const uint32_t base) {
         result = result + cur_pow * float(value % base);
         value /= base;
     }
+    static std::ofstream fout("../input.txt");
+    fout << result << '\n';
 
     return result;
 }
@@ -77,10 +81,11 @@ inline float random(SamplerState &state) {
         static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
                                                   67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
 
-        const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
+        const uint32_t dimension = uint32_t(Dim) + state.depth;
         const uint32_t base = primeNumbers[dimension & 31u];
-        ++state.depth;
-        return HaltonRand(state.seed + state.sampleIdx + state.depth * MAX_PATHS, base);
+        ++state.now;
+
+        return HaltonRand((state.seed + state.sampleIdx + state.depth) * MAX_BOUNCE + state.now, base);
     } else if (random_generator_type == Sobol) {
         return SobolRandom(state.seed, state.depth);
     }
