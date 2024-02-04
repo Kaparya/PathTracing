@@ -23,8 +23,8 @@ using namespace glm;
 
 const float EPS = 1e-5f;
 
-const int MAX_PATHS = 32; // 32
-const int MAX_BOUNCE = 4; // 4
+const int MAX_PATHS = 10; // 32
+const int MAX_BOUNCE = 10 ; // 4
 
 struct Ray {
     vec4 o;
@@ -606,7 +606,7 @@ int main() {
         pixels[h * (width * 4) + (w * 4) + 2] = std::min(255, std::max(0, b));
         pixels[h * (width * 4) + (w * 4) + 3] = 255;
     }
-    std::string outputFileName = "../ResultsWithNewInterface/Halton/";
+    std::string outputFileName = "../Results/Halton/";
     outputFileName += std::to_string(MAX_PATHS) + '_';
     outputFileName += std::to_string(MAX_BOUNCE) + ".png";
     stbi_write_png(outputFileName.c_str(), width, height, 4, pixels.data(), 0);

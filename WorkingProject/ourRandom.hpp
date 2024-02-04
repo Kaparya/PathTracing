@@ -3,12 +3,13 @@
 #include <iostream>
 #include <fstream>
 #include "glm/glm.hpp"
+#include "Halton.h"
 
 using namespace glm;
 
 extern const int MAX_PATHS;
 extern const int MAX_BOUNCE;
-const uint32_t SEED = 137;
+const uint32_t SEED = 1033;
 
 enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder, Halton, Sobol
@@ -43,21 +44,6 @@ inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixel
     return sampler;
 }
 
-inline float HaltonRand(uint32_t value, const uint32_t base) {
-    float cur_pow = 1;
-    float result = 0;
-
-    while (value > 0) {
-        cur_pow = cur_pow / float(base);
-        result = result + cur_pow * float(value % base);
-        value /= base;
-    }
-    static std::ofstream fout("../input.txt");
-    fout << result << '\n';
-
-    return result;
-}
-
 inline float SobolRandom(uint32_t &prev_x, uint32_t &cur_index) {
 
     ++cur_index;
@@ -80,12 +66,18 @@ inline float random(SamplerState &state) {
 
         static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
                                                   67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
+        static const uint32_t primeSums[32] = {2, 5, 10, 17, 28, 41, 58, 77, 100, 129, 160, 197, 238, 281, 328, 381,
+                                               440, 501, 568, 639, 712, 791, 874, 963, 1060, 1161, 1264, 1371, 1480,
+                                               1593, 1720, 1851};
 
-        const uint32_t dimension = uint32_t(Dim) + state.depth;
+        const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
         const uint32_t base = primeNumbers[dimension & 31u];
-        ++state.now;
 
-        return HaltonRand((state.seed + state.sampleIdx + state.depth) * MAX_BOUNCE + state.now, base);
+        auto result = HaltonRand((state.seed + state.sampleIdx) * 1000 + state.now, base);
+        static std::ofstream fout("../output.txt");
+        fout << result << '\n';
+        ++state.now;
+        return result;
     } else if (random_generator_type == Sobol) {
         return SobolRandom(state.seed, state.depth);
     }
