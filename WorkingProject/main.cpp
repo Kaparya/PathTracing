@@ -1,11 +1,5 @@
 #include <vector>
-#include <chrono>
 #include <iostream>
-
-#include "ourRandom.hpp"
-
-#define _USE_MATH_DEFINES
-
 #include <cmath>
 #include <glm/glm.hpp>
 
@@ -13,18 +7,16 @@
 
 #include <stb_image_write.h>
 
-
 #define TINYOBJLOADER_IMPLEMENTATION
 
 #include <tiny_obj_loader.h>
 
 
+#include "Random/ourRandom.hpp"
+#include "Constants.h"
+
+
 using namespace glm;
-
-const float EPS = 1e-5f;
-
-const int MAX_PATHS = 100; // 32
-const int MAX_BOUNCE = 100 ; // 4
 
 struct Ray {
     vec4 o;
@@ -51,7 +43,7 @@ public:
     Ray get_ray(const float s, const float t, SamplerState &currentState) const {
         vec3 rd = lens_radius * random_in_unit_disk(currentState);
         vec3 offset = u * rd.x + v * rd.y;
-        Ray ray;
+        Ray ray{};
         ray.o = vec4(origin + offset, 1.0);
         ray.d = glm::normalize(vec4(lower_left_corner + s * horizontal + t * vertical - origin - offset, 0.0));
         return ray;
@@ -69,7 +61,7 @@ struct Intersection {
     int shapeId = -1;
     int primitiveId = -1;
     int materialId = -1;
-    vec2 uv;
+    vec2 uv{};
     float t = 1e9f;
 };
 
@@ -108,10 +100,10 @@ struct Triangle {
         vec3 p = cross(vec3(r.d), e2);
         float det = dot(e1, p);
         // culling
-        if (det < EPS) {
+        if (det < EPSILON) {
             return false;
         }
-        // if (abs(det) < EPS)
+        // if (abs(det) < EPSILON)
         // {
         // return false;
         // }
@@ -128,7 +120,7 @@ struct Triangle {
         }
         float t = dot(e2, Q) * invDet;
         // if (t < 0.0f || t > isec.t)
-        if (t < EPS || t > isec.t) {
+        if (t < EPSILON || t > isec.t) {
             return false;
         }
 
@@ -141,9 +133,9 @@ struct Triangle {
     }
 };
 
-int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const Camera &cam, int width, int height,
+int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const Camera &cam,
                        std::vector<SamplerState> &raysStates, const int path) {
-    const int numRays = width * height;
+    const int numRays = IMAGE_WIDTH * IMAGE_HEIGHT;
     rays.reserve(numRays);
     pixCoord.reserve(numRays);
 
@@ -153,27 +145,35 @@ int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const
     // ^
     // |
     // O---> X
-    for (int h = height - 1; h >= 0; --h) {
-        for (int w = 0; w < width; ++w) {
-            raysStates[h * width + w] = initSampler(h * width + w, path, SEED);
+    for (int h = IMAGE_HEIGHT - 1; h >= 0; --h) {
+        for (int w = 0; w < IMAGE_WIDTH; ++w) {
+            raysStates[h * IMAGE_WIDTH + w] = initSampler(h * IMAGE_WIDTH + w, path);
 
-            SamplerState &currentState = raysStates[h * width + w];
+            SamplerState &currentState = raysStates[h * IMAGE_WIDTH + w];
 
-            float u = float(w + random<SampleDimension::ePixelX>(currentState)) / float(width);
-            float v = float(h + random<SampleDimension::ePixelY>(currentState)) / float(height);
+            auto help = random<SampleDimension::ePixelX>(currentState);
+            float u = ((float)w + help) / float(IMAGE_WIDTH);
+            auto help1 = random<SampleDimension::ePixelY>(currentState);
+            float v = ((float)h + help1) / float(IMAGE_HEIGHT);
+
+            if (CHECK_PIXEL && h == CHECK_PIXEL_X && w == CHECK_PIXEL_Y) {
+                static std::string fileName = "../RaysOriginsForPixel_";
+                if (random_generator_type == Sobol) {
+                    fileName += "sobol_";
+                } else {
+                    fileName += "halton_";
+                }
+                fileName += std::to_string(MAX_PATHS) + ".txt";
+                static std::ofstream output(fileName);
+                output << help << ' ' << help1 << '\n';
+            }
 
             Ray r = cam.get_ray(u, v, currentState);
             rays.push_back(r);
-            pixCoord.push_back(h * width + w);
+            pixCoord.push_back(h * IMAGE_WIDTH + w);
         }
     }
     return numRays;
-}
-
-static std::string GetBaseDir(const std::string &filepath) {
-    if (filepath.find_last_of("/\\") != std::string::npos)
-        return filepath.substr(0, filepath.find_last_of("/\\"));
-    return "";
 }
 
 struct AccelStructure {
@@ -188,9 +188,9 @@ struct AccelStructure {
     bool chit(const Ray &r, Intersection &isec) {
         // traverse
         for (int i = 0; i < indices.size() - 2; i += 3) {
-            const int indexA = indices[i + 0];
-            const int indexB = indices[i + 1];
-            const int indexC = indices[i + 2];
+            const int indexA = (int)indices[i + 0];
+            const int indexB = (int)indices[i + 1];
+            const int indexC = (int)indices[i + 2];
             const vec3 &a = vertices[indexA];
             const vec3 &b = vertices[indexB];
             const vec3 &c = vertices[indexC];
@@ -226,7 +226,7 @@ vec3 hemisphereSampleUniform(const vec2 &uv) {
     float sinTheta = sqrtf(clamp(1.0f - cosTheta * cosTheta, 0.0f, 1.0f));
     float phi = uv.y * 2.0f * float(M_PI);
     // avoid coplanar to surface rays
-    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+    return {cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta};
 }
 
 vec3 hemisphereSampleCosine(const vec2 &uv) {
@@ -234,24 +234,14 @@ vec3 hemisphereSampleCosine(const vec2 &uv) {
     float sinTheta = sqrtf(clamp(1.0f - cosTheta * cosTheta, 0.0f, 1.0f));
     float phi = uv.y * 2.0f * float(M_PI);
     // avoid coplanar to surface rays
-    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+    return {cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta};
 }
 
 int main() {
     std::cout << "Started\n";
 
-    int width = 320;
-    int height = 240;
-//    int width = 1440;
-//    int height = 1080;
-
     std::string modelPath = "../assets/CornellBox-Original.obj";
     std::string materialPath = "../assets/";
-//    std::string modelPath = "../assets/box/cube.obj";
-//    std::string materialPath = "../assets/box/";
-
-    // std::string filename = "./media/CornellBox/CornellBox-Empty-RG.obj";
-    // std::string filename = "./media/CornellBox/CornellBox-Sphere.obj";
 
 
     tinyobj::attrib_t attrib;
@@ -274,11 +264,11 @@ int main() {
     } else {
         std::cout << "Loaded" << std::endl;
 
-        printf("# of vertices  = %d\n", (int) (attrib.vertices.size()) / 3);
-        printf("# of normals   = %d\n", (int) (attrib.normals.size()) / 3);
-        printf("# of texcoords = %d\n", (int) (attrib.texcoords.size()) / 2);
-        printf("# of materials = %d\n", (int) materials.size());
-        printf("# of shapes    = %d\n", (int) shapes.size());
+        printf("# of vertices   = %d\n", (int) (attrib.vertices.size()) / 3);
+        printf("# of normals    = %d\n", (int) (attrib.normals.size()) / 3);
+        printf("# of tex coords = %d\n", (int) (attrib.texcoords.size()) / 2);
+        printf("# of materials  = %d\n", (int) materials.size());
+        printf("# of shapes     = %d\n", (int) shapes.size());
     }
 
     AccelStructure world;
@@ -290,10 +280,9 @@ int main() {
             std::cout << "found light" << std::endl;
         }
 
-        int baseIdx = 0;
         for (int f = 0; f < shape.mesh.indices.size() / 3; ++f) {
             if (isLight) {
-                world.lightsIdx.push_back(world.vertices.size());
+                world.lightsIdx.push_back((int)world.vertices.size());
             }
             tinyobj::index_t idx0 = shape.mesh.indices[3 * f + 0];
             tinyobj::index_t idx1 = shape.mesh.indices[3 * f + 1];
@@ -387,9 +376,9 @@ int main() {
     vec3 lookat(0, 1.0, 0);
     float dist_to_focus = glm::length(lookfrom - lookat);
     float aperture = 0.0f;
-    Camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(width) / float(height), aperture, dist_to_focus);
+    Camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(IMAGE_WIDTH) / float(IMAGE_HEIGHT), aperture, dist_to_focus);
 
-    const int numPixels = height * width;
+    const int numPixels = IMAGE_HEIGHT * IMAGE_WIDTH;
     std::vector<uint8_t> pixels(numPixels * 4);
     std::vector<vec4> colors(numPixels, vec4(0.0f));
 
@@ -399,17 +388,17 @@ int main() {
 
         // generate primary rays
         std::vector<std::vector<Ray>> raysBuffers(2);
-        std::vector<std::vector<int>> pixelCoordBuffers(2); // stores pixel coord as int: (h * width + w)
+        std::vector<std::vector<int>> pixelCoordBuffers(2); // stores pixel coord as int: (h * IMAGE_WIDTH + w)
         std::vector<std::vector<vec3>> pathWeightBuffers(2);
 
         std::vector<SamplerState> raysStates;
 
-        int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, width, height, raysStates, path);
+        int numRays = generateCameraRays(raysBuffers[0], pixelCoordBuffers[0], cam, raysStates, path);
         pathWeightBuffers[0].resize(numRays);
         pathWeightBuffers[0].assign(numRays, vec3{1.0f});
         for (int bounce = 0; bounce < MAX_BOUNCE; ++bounce) {
             const int currentBufferId = bounce % 2;
-            numRays = raysBuffers[currentBufferId].size();
+            numRays = (int)raysBuffers[currentBufferId].size();
             // intersect rays
             std::vector<Intersection> isecs(numRays);
             for (int i = 0; i < numRays; ++i) {
@@ -418,10 +407,10 @@ int main() {
             // shade missing
             for (int i = 0; i < numRays; ++i) {
                 if (isecs[i].shapeId != 1) {
-                    const int h = height - 1 - pixelCoordBuffers[currentBufferId][i] / width;
-                    const int w = pixelCoordBuffers[currentBufferId][i] % width;
+                    const int h = IMAGE_HEIGHT - 1 - pixelCoordBuffers[currentBufferId][i] / IMAGE_WIDTH;
+                    const int w = pixelCoordBuffers[currentBufferId][i] % IMAGE_WIDTH;
 
-                    colors[h * width + w] += vec4(0.0f);
+                    colors[h * IMAGE_WIDTH + w] += vec4(0.0f);
                 }
             }
             // compact rays
@@ -430,8 +419,8 @@ int main() {
                 if (isecs[i].shapeId == 1) {
                     ++raysStates[i].depth;
 
-                    const int h = height - 1 - pixelCoordBuffers[currentBufferId][i] / width;
-                    const int w = pixelCoordBuffers[currentBufferId][i] % width;
+                    const int h = IMAGE_HEIGHT - 1 - pixelCoordBuffers[currentBufferId][i] / IMAGE_WIDTH;
+                    const int w = pixelCoordBuffers[currentBufferId][i] % IMAGE_WIDTH;
 
                     const auto &material = materials[isecs[i].materialId];
                     const vec3 diffuse(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
@@ -444,13 +433,13 @@ int main() {
                             continue;
                         }
                         const vec3 lightColor(material.emission[0], material.emission[1], material.emission[2]);
-                        colors[h * width + w] += vec4(lightColor * pathWeightBuffers[currentBufferId][i], 1.0f);
+                        colors[h * IMAGE_WIDTH + w] += vec4(lightColor * pathWeightBuffers[currentBufferId][i], 1.0f);
                         continue;
                     }
 
-                    const int indexA = world.indices[isecs[i].primitiveId];
-                    const int indexB = world.indices[isecs[i].primitiveId + 1];
-                    const int indexC = world.indices[isecs[i].primitiveId + 2];
+                    const int indexA = (int)world.indices[isecs[i].primitiveId];
+                    const int indexB = (int)world.indices[isecs[i].primitiveId + 1];
+                    const int indexC = (int)world.indices[isecs[i].primitiveId + 2];
 
                     const vec3 A = world.vertices[indexA];
                     const vec3 B = world.vertices[indexB];
@@ -492,7 +481,7 @@ int main() {
 
                         const vec3 lightWPos = (1.0f - luv.x - luv.y) * lA + lB * luv.x + lC * luv.y;
                         const vec3 lightN = normalize((1.0f - luv.x - luv.y) * nLA + nLB * luv.x + nLC * luv.y);
-                        const vec3 offset{N * EPS};
+                        const vec3 offset{N * EPSILON};
 
                         const vec3 rayO = hitWpos + offset;
                         const vec3 rayD = normalize(lightWPos - rayO);
@@ -506,12 +495,12 @@ int main() {
                         const float NLdotV = glm::dot(lightN, V);
                         float visibility = 0.0f;
                         if (NdotL > 0.0f) {
-                            Ray shadow;
+                            Ray shadow{};
                             shadow.o = vec4(rayO, 1.0f);
                             shadow.d = vec4(rayD, 0.0f);
                             Intersection is;
                             bool isHit = world.chit(shadow, is);
-                            visibility = (isHit && is.t < (distToLight - EPS * 1.0f)) ? 0.0f : 1.0f;
+                            visibility = (isHit && is.t < (distToLight - EPSILON * 1.0f)) ? 0.0f : 1.0f;
                         }
                         if (NLdotV > 0.0f) {
                             float area = glm::length(glm::cross(lC - lA, lB - lA)) * 0.5f;
@@ -523,7 +512,7 @@ int main() {
                     }
                     color *= diffuse * float(M_1_PI) * pathWeightBuffers[currentBufferId][i];
                     // color *= diffuse * pathWeightBuffers[currentBufferId][i];
-                    colors[h * width + w] += vec4(color, 1.0f);
+                    colors[h * IMAGE_WIDTH + w] += vec4(color, 1.0f);
                 }
             }
             const int nextBufferId = (bounce + 1) % 2;
@@ -534,9 +523,9 @@ int main() {
                 if (isecs[i].shapeId == 1) {
                     ++raysStates[i].depth;
 
-                    const int indexA = world.indices[isecs[i].primitiveId];
-                    const int indexB = world.indices[isecs[i].primitiveId + 1];
-                    const int indexC = world.indices[isecs[i].primitiveId + 2];
+                    const int indexA = (int)world.indices[isecs[i].primitiveId];
+                    const int indexB = (int)world.indices[isecs[i].primitiveId + 1];
+                    const int indexC = (int)world.indices[isecs[i].primitiveId + 2];
 
                     const vec3 A = world.vertices[indexA];
                     const vec3 B = world.vertices[indexB];
@@ -569,8 +558,8 @@ int main() {
                     // vec3 Dir = normalize(vec3(getRandom(), getRandom(), getRandom()));
                     // Dir = dot(N, Dir) < 0.0f ? -Dir: Dir;
                     // rayDirection = Dir;
-                    const vec3 offset{_N * EPS};
-                    Ray r;
+                    const vec3 offset{_N * EPSILON};
+                    Ray r{};
                     r.o = vec4(hitWpos + offset, 1.0f);
                     r.d = vec4(rayDirection, 0.0f);
                     raysBuffers[nextBufferId].push_back(r);
@@ -591,20 +580,20 @@ int main() {
     const float aGamma = 2.2f;
     const float invGamma = 1.0f / aGamma;
     for (int i = 0; i < numPixels; ++i) {
-        const int h = i / width;
-        const int w = i % width;
-        const float normalizeCoeff = (1.0f / MAX_PATHS);
+        const int h = i / IMAGE_WIDTH;
+        const int w = i % IMAGE_WIDTH;
+        const float normalizeCoefficient = (1.0f / MAX_PATHS);
 
-        const vec3 &color = colors[i] * normalizeCoeff;
+        const vec3 &color = colors[i] * normalizeCoefficient;
 
         const int r = int(std::pow(color.r, invGamma) * 255.f);
         const int g = int(std::pow(color.g, invGamma) * 255.f);
         const int b = int(std::pow(color.b, invGamma) * 255.f);
 
-        pixels[h * (width * 4) + (w * 4) + 0] = std::min(255, std::max(0, r));
-        pixels[h * (width * 4) + (w * 4) + 1] = std::min(255, std::max(0, g));
-        pixels[h * (width * 4) + (w * 4) + 2] = std::min(255, std::max(0, b));
-        pixels[h * (width * 4) + (w * 4) + 3] = 255;
+        pixels[h * (IMAGE_WIDTH * 4) + (w * 4) + 0] = std::min(255, std::max(0, r));
+        pixels[h * (IMAGE_WIDTH * 4) + (w * 4) + 1] = std::min(255, std::max(0, g));
+        pixels[h * (IMAGE_WIDTH * 4) + (w * 4) + 2] = std::min(255, std::max(0, b));
+        pixels[h * (IMAGE_WIDTH * 4) + (w * 4) + 3] = 255;
     }
     std::string outputFileName = "../Results/";
     switch (random_generator_type) {
@@ -619,7 +608,7 @@ int main() {
     }
     outputFileName += std::to_string(MAX_PATHS) + '_';
     outputFileName += std::to_string(MAX_BOUNCE) + ".png";
-    stbi_write_png(outputFileName.c_str(), width, height, 4, pixels.data(), 0);
+    stbi_write_png(outputFileName.c_str(), IMAGE_WIDTH, IMAGE_HEIGHT, 4, pixels.data(), 0);
 
     return 0;
 }
