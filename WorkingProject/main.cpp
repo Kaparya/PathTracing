@@ -151,22 +151,8 @@ int generateCameraRays(std::vector<Ray> &rays, std::vector<int> &pixCoord, const
 
             SamplerState &currentState = raysStates[h * IMAGE_WIDTH + w];
 
-            auto help = random<SampleDimension::ePixelX>(currentState);
-            float u = ((float)w + help) / float(IMAGE_WIDTH);
-            auto help1 = random<SampleDimension::ePixelY>(currentState);
-            float v = ((float)h + help1) / float(IMAGE_HEIGHT);
-
-            if (CHECK_PIXEL && h == CHECK_PIXEL_X && w == CHECK_PIXEL_Y) {
-                static std::string fileName = "../RaysOriginsForPixel_";
-                if (random_generator_type == Sobol) {
-                    fileName += "sobol_";
-                } else {
-                    fileName += "halton_";
-                }
-                fileName += std::to_string(MAX_PATHS) + ".txt";
-                static std::ofstream output(fileName);
-                output << help << ' ' << help1 << '\n';
-            }
+            float u = ((float) w + random<SampleDimension::ePixelX>(currentState)) / float(IMAGE_WIDTH);
+            float v = ((float) h + random<SampleDimension::ePixelY>(currentState)) / float(IMAGE_HEIGHT);
 
             Ray r = cam.get_ray(u, v, currentState);
             rays.push_back(r);
@@ -188,9 +174,9 @@ struct AccelStructure {
     bool chit(const Ray &r, Intersection &isec) {
         // traverse
         for (int i = 0; i < indices.size() - 2; i += 3) {
-            const int indexA = (int)indices[i + 0];
-            const int indexB = (int)indices[i + 1];
-            const int indexC = (int)indices[i + 2];
+            const int indexA = (int) indices[i + 0];
+            const int indexB = (int) indices[i + 1];
+            const int indexC = (int) indices[i + 2];
             const vec3 &a = vertices[indexA];
             const vec3 &b = vertices[indexB];
             const vec3 &c = vertices[indexC];
@@ -282,7 +268,7 @@ int main() {
 
         for (int f = 0; f < shape.mesh.indices.size() / 3; ++f) {
             if (isLight) {
-                world.lightsIdx.push_back((int)world.vertices.size());
+                world.lightsIdx.push_back((int) world.vertices.size());
             }
             tinyobj::index_t idx0 = shape.mesh.indices[3 * f + 0];
             tinyobj::index_t idx1 = shape.mesh.indices[3 * f + 1];
@@ -398,7 +384,7 @@ int main() {
         pathWeightBuffers[0].assign(numRays, vec3{1.0f});
         for (int bounce = 0; bounce < MAX_BOUNCE; ++bounce) {
             const int currentBufferId = bounce % 2;
-            numRays = (int)raysBuffers[currentBufferId].size();
+            numRays = (int) raysBuffers[currentBufferId].size();
             // intersect rays
             std::vector<Intersection> isecs(numRays);
             for (int i = 0; i < numRays; ++i) {
@@ -417,8 +403,6 @@ int main() {
             // eval material
             for (int i = 0; i < numRays; ++i) {
                 if (isecs[i].shapeId == 1) {
-                    ++raysStates[i].depth;
-
                     const int h = IMAGE_HEIGHT - 1 - pixelCoordBuffers[currentBufferId][i] / IMAGE_WIDTH;
                     const int w = pixelCoordBuffers[currentBufferId][i] % IMAGE_WIDTH;
 
@@ -437,9 +421,9 @@ int main() {
                         continue;
                     }
 
-                    const int indexA = (int)world.indices[isecs[i].primitiveId];
-                    const int indexB = (int)world.indices[isecs[i].primitiveId + 1];
-                    const int indexC = (int)world.indices[isecs[i].primitiveId + 2];
+                    const int indexA = (int) world.indices[isecs[i].primitiveId];
+                    const int indexB = (int) world.indices[isecs[i].primitiveId + 1];
+                    const int indexC = (int) world.indices[isecs[i].primitiveId + 2];
 
                     const vec3 A = world.vertices[indexA];
                     const vec3 B = world.vertices[indexB];
@@ -509,7 +493,10 @@ int main() {
                             const float pdf = distToLight2 / (NLdotV * area);
                             color += visibility * NdotL * NLdotV * lightColor / (distToLight2 * pdf);
                         }
+
+                        ++raysStates[i].depth;
                     }
+                    raysStates[i].depth = 0;
                     color *= diffuse * float(M_1_PI) * pathWeightBuffers[currentBufferId][i];
                     // color *= diffuse * pathWeightBuffers[currentBufferId][i];
                     colors[h * IMAGE_WIDTH + w] += vec4(color, 1.0f);
@@ -523,9 +510,9 @@ int main() {
                 if (isecs[i].shapeId == 1) {
                     ++raysStates[i].depth;
 
-                    const int indexA = (int)world.indices[isecs[i].primitiveId];
-                    const int indexB = (int)world.indices[isecs[i].primitiveId + 1];
-                    const int indexC = (int)world.indices[isecs[i].primitiveId + 2];
+                    const int indexA = (int) world.indices[isecs[i].primitiveId];
+                    const int indexB = (int) world.indices[isecs[i].primitiveId + 1];
+                    const int indexC = (int) world.indices[isecs[i].primitiveId + 2];
 
                     const vec3 A = world.vertices[indexA];
                     const vec3 B = world.vertices[indexB];

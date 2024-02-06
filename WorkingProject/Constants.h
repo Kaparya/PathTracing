@@ -15,7 +15,7 @@ enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder, Halton, Sobol
 };
 
-random_generator random_generator_type = Halton;
+random_generator random_generator_type = Sobol;
 
 const bool CHECK_PIXEL = false;
 const int CHECK_PIXEL_X = 10;
