@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 coords_x = []
 coords_y = []
 
-gen = 0
+gen = 2
 
 if gen == 0:
-    x_file_name = "0.txt"
-    y_file_name = "1.txt"
+    x_file_name = "ePixelX_0.txt"
+    y_file_name = "ePixelY_1.txt"
 elif gen == 1:
-    x_file_name = "3.txt"
-    y_file_name = "4.txt"
+    x_file_name = "eLightPointX_3.txt"
+    y_file_name = "eLightPointY_4.txt"
 else:
-    x_file_name = "9.txt"
-    y_file_name = "10.txt"
+    x_file_name = "eGetRayX_9.txt"
+    y_file_name = "eGetRayY_10.txt"
 
 data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + x_file_name, "r")
 for line in data_x:

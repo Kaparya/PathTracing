@@ -9,15 +9,6 @@
 
 using namespace glm;
 
-static std::ofstream fout("../DimensionsTest/output.txt");
-static std::ofstream fout0("../DimensionsTest/0.txt");
-static std::ofstream fout1("../DimensionsTest/1.txt");
-static std::ofstream fout3("../DimensionsTest/3.txt");
-static std::ofstream fout4("../DimensionsTest/4.txt");
-static std::ofstream fout9("../DimensionsTest/9.txt");
-static std::ofstream fout10("../DimensionsTest/10.txt");
-
-
 enum struct SampleDimension : uint32_t {
     ePixelX,
     ePixelY,
@@ -50,7 +41,6 @@ inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixel
 template<SampleDimension Dim>
 inline float random(SamplerState &currentState) {
 
-    auto dim1 = uint32_t(Dim);
     const uint32_t dimension = uint32_t(Dim) + currentState.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
     static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
                                               67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
@@ -63,28 +53,28 @@ inline float random(SamplerState &currentState) {
         result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
     }
 
-    if (MAX_PATHS <= 100 && currentState.seed == SEED + 100 * IMAGE_WIDTH + 100) {
-        switch (uint32_t(Dim)) {
-            case 0:
-                fout0 << result << '\n';
+    if (MAX_PATHS <= 100 && currentState.seed == SEED + CHECK_PIXEL_X * IMAGE_WIDTH + CHECK_PIXEL_Y) {
+        switch (Dim) {
+            case SampleDimension::ePixelX:
+                ePixelX << result << '\n';
                 break;
-            case 1:
-                fout1 << result << '\n';
+            case SampleDimension::ePixelY:
+                ePixelY << result << '\n';
                 break;
-            case 3:
-                fout3 << result << '\n';
+            case SampleDimension::eLightPointX:
+                eLightPointX << result << '\n';
                 break;
-            case 4:
-                fout4 << result << '\n';
+            case SampleDimension::eLightPointY:
+                eLightPointY << result << '\n';
                 break;
-            case 9:
-                fout9 << result << '\n';
+            case SampleDimension::eGetRayX:
+                eGetRayX << result << '\n';
                 break;
-            case 10:
-                fout10 << result << '\n';
+            case SampleDimension::eGetRayY:
+                eGetRayY << result << '\n';
                 break;
         }
-        fout << result << ' ' << uint32_t(Dim) << ' ' << currentState.sampleIdx << ' ' << currentState.depth << '\n';
+        allDimensions << result << ' ' << uint32_t(Dim) << ' ' << currentState.sampleIdx << ' ' << currentState.depth << '\n';
     }
 
     if (MAX_PATHS == 10) {
@@ -100,12 +90,16 @@ inline float random(SamplerState &currentState) {
 }
 
 vec3 random_in_unit_disk(SamplerState &currentState) {
+
 //    vec3 p;
+//
 //    do {
 //        p = 2.0f * vec3(random<SampleDimension::eGetRayX>(currentState),
 //                        random<SampleDimension::eGetRayY>(currentState), 0) - vec3(1, 1, 0);
 //    } while (dot(p, p) >= 1.0);
+//
 //    return p;
+
     float x = random<SampleDimension::eGetRayX>(currentState);
     float y = random<SampleDimension::eGetRayY>(currentState);
 
