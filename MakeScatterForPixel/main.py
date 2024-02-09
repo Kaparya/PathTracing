@@ -1,18 +1,24 @@
 import matplotlib.pyplot as plt
 
 
+name = "Sobol"
+max_path = 8
+max_bounce = 4
+
+config_str = name + "_" + str(max_path) + "_" + str(max_bounce) + "_"
+
 fig, axs = plt.subplots(1, 3, dpi=150)
 fig.suptitle("Dimensions Test")
 fig.tight_layout()
 
 coords_x = []
 coords_y = []
-data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/ePixelX_0.txt", "r")
+data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "ePixelX_0.txt", "r")
 for line in data_x:
     help = line.split()
     coords_x.append(float(help[0]))
 
-data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/ePixelY_1.txt", "r")
+data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "ePixelY_1.txt", "r")
 for line in data_y:
     help = line.split()
     coords_y.append(float(help[0]))
@@ -28,12 +34,12 @@ axs[0].set_box_aspect(1)
 
 coords_x.clear()
 coords_y.clear()
-data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/eLightPointX_3.txt", "r")
+data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eLightPointX_3.txt", "r")
 for line in data_x:
     help = line.split()
     coords_x.append(float(help[0]))
 
-data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/eLightPointY_4.txt", "r")
+data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eLightPointY_4.txt", "r")
 for line in data_y:
     help = line.split()
     coords_y.append(float(help[0]))
@@ -49,12 +55,12 @@ axs[1].set_box_aspect(1)
 
 coords_x.clear()
 coords_y.clear()
-data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/eGetRayX_9.txt", "r")
+data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eGetRayX_9.txt", "r")
 for line in data_x:
     help = line.split()
     coords_x.append(float(help[0]))
 
-data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/eGetRayY_10.txt", "r")
+data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eGetRayY_10.txt", "r")
 for line in data_y:
     help = line.split()
     coords_y.append(float(help[0]))
@@ -68,5 +74,5 @@ axs[2].set_ylabel("10 dim")
 axs[2].set_box_aspect(1)
 
 
-plt.savefig("Halton/100_8.png", bbox_inches='tight')
+plt.savefig(name + "/" + str(max_path) + "_" + str(max_bounce), bbox_inches='tight')
 plt.show()
