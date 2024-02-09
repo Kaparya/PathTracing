@@ -38,6 +38,10 @@ inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixel
     return sampler;
 }
 
+static const std::vector<uint32_t> RandomDigitScrambling = {432184344, 3123020165, 1712321849, 712353037, 2387471059, 2384934338,
+                                                            823984981, 455117590, 631653891, 473658509, 810543653, 3849875751,
+                                                            1859591936};
+
 template<SampleDimension Dim>
 inline float random(SamplerState &currentState) {
 
@@ -50,7 +54,11 @@ inline float random(SamplerState &currentState) {
     if (random_generator_type == Halton) {
         result = HaltonRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
     } else if (random_generator_type == Sobol) {
-        result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
+        if (scrambling_type == RandomDigit) {
+            result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base, RandomDigitScrambling[(uint32_t)Dim]);
+        } else {
+            result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
+        }
     }
 
     if (currentState.seed == SEED + CHECK_PIXEL_X * IMAGE_WIDTH + CHECK_PIXEL_Y) {
@@ -74,7 +82,8 @@ inline float random(SamplerState &currentState) {
                 eGetRayY << result << '\n';
                 break;
         }
-        allDimensions << result << ' ' << uint32_t(Dim) << ' ' << currentState.sampleIdx << ' ' << currentState.depth << '\n';
+        allDimensions << result << ' ' << uint32_t(Dim) << ' ' << currentState.sampleIdx << ' ' << currentState.depth
+                      << '\n';
     }
 
     if (MAX_PATHS == 10) {

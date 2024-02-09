@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 
-
 name = "Sobol"
-max_path = 8
-max_bounce = 4
+max_path = 256
+max_bounce = 8
+scrambling_type = "RandomDigits"
 
 config_str = name + "_" + str(max_path) + "_" + str(max_bounce) + "_"
+if scrambling_type == "RandomDigits":
+    config_str = scrambling_type + "/" + config_str
 
 fig, axs = plt.subplots(1, 3, dpi=150)
 fig.suptitle("Dimensions Test")
@@ -31,7 +33,6 @@ axs[0].set_ylim(0, 1)
 axs[0].set_ylabel("1 dim")
 axs[0].set_box_aspect(1)
 
-
 coords_x.clear()
 coords_y.clear()
 data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eLightPointX_3.txt", "r")
@@ -51,7 +52,6 @@ axs[1].set_xlabel("3 dim")
 axs[1].set_ylim(0, 1)
 axs[1].set_ylabel("4 dim")
 axs[1].set_box_aspect(1)
-
 
 coords_x.clear()
 coords_y.clear()
@@ -73,6 +73,10 @@ axs[2].set_ylim(0, 1)
 axs[2].set_ylabel("10 dim")
 axs[2].set_box_aspect(1)
 
+config_str = name + "/" + str(max_path) + "_" + str(max_bounce) + ".png"
 
-plt.savefig(name + "/" + str(max_path) + "_" + str(max_bounce), bbox_inches='tight')
+if scrambling_type == "RandomDigits":
+    config_str = "RandomDigits/" + config_str
+
+plt.savefig(config_str, bbox_inches='tight')
 plt.show()

@@ -380,6 +380,11 @@ int main() {
         pixels[h * (IMAGE_WIDTH * 4) + (w * 4) + 3] = 255;
     }
     std::string outputFileName = "../Results/";
+
+    if (scrambling_type == RandomDigit) {
+        outputFileName += "RandomDigits/";
+    }
+
     switch (random_generator_type) {
         case Sobol:
             outputFileName += "Sobol/";
