@@ -53,7 +53,7 @@ inline float random(SamplerState &currentState) {
         result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
     }
 
-    if (MAX_PATHS <= 100 && currentState.seed == SEED + CHECK_PIXEL_X * IMAGE_WIDTH + CHECK_PIXEL_Y) {
+    if (currentState.seed == SEED + CHECK_PIXEL_X * IMAGE_WIDTH + CHECK_PIXEL_Y) {
         switch (Dim) {
             case SampleDimension::ePixelX:
                 ePixelX << result << '\n';
