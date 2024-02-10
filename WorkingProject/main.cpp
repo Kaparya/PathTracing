@@ -186,6 +186,7 @@ int main() {
             std::vector<Intersection> isecs(numRays);
             for (int i = 0; i < numRays; ++i) {
                 bool isHit = world.chit(raysBuffers[currentBufferId][i], isecs[i]);
+                ++raysStates[i].depth;
             }
             // shade missing
             for (int i = 0; i < numRays; ++i) {
@@ -200,6 +201,7 @@ int main() {
             // eval material
             for (int i = 0; i < numRays; ++i) {
                 if (isecs[i].shapeId == 1) {
+
                     const int h = IMAGE_HEIGHT - 1 - pixelCoordBuffers[currentBufferId][i] / IMAGE_WIDTH;
                     const int w = pixelCoordBuffers[currentBufferId][i] % IMAGE_WIDTH;
 
@@ -291,9 +293,7 @@ int main() {
                             color += visibility * NdotL * NLdotV * lightColor / (distToLight2 * pdf);
                         }
 
-                        ++raysStates[i].depth;
                     }
-                    raysStates[i].depth = 0;
                     color *= diffuse * float(M_1_PI) * pathWeightBuffers[currentBufferId][i];
                     // color *= diffuse * pathWeightBuffers[currentBufferId][i];
                     colors[h * IMAGE_WIDTH + w] += vec4(color, 1.0f);
@@ -305,7 +305,6 @@ int main() {
             pathWeightBuffers[nextBufferId].clear();
             for (int i = 0; i < numRays; ++i) {
                 if (isecs[i].shapeId == 1) {
-                    ++raysStates[i].depth;
 
                     const int indexA = (int) world.indices[isecs[i].primitiveId];
                     const int indexB = (int) world.indices[isecs[i].primitiveId + 1];
@@ -381,20 +380,8 @@ int main() {
     }
     std::string outputFileName = "../Results/";
 
-    if (scrambling_type == RandomDigit) {
-        outputFileName += "RandomDigits/";
-    }
-
-    switch (random_generator_type) {
-        case Sobol:
-            outputFileName += "Sobol/";
-            break;
-        case Halton:
-            outputFileName += "Halton/";
-            break;
-        default:
-            outputFileName += "NewOne/";
-    }
+    outputFileName += scrambling_type_name;
+    outputFileName += random_generator_type_name + "/";
     outputFileName += std::to_string(MAX_PATHS) + '_';
     outputFileName += std::to_string(MAX_BOUNCE) + ".png";
     stbi_write_png(outputFileName.c_str(), IMAGE_WIDTH, IMAGE_HEIGHT, 4, pixels.data(), 0);

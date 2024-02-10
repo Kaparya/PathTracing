@@ -15,18 +15,15 @@ const int CHECK_PIXEL_X = 100;
 const int CHECK_PIXEL_Y = 100;
 
 
-
-
-
 enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder, Halton, Sobol
 };
-random_generator random_generator_type = Sobol;
+const random_generator random_generator_type = Sobol;
 
 enum scrambling {
-    RandomDigit, None
+    RandomDigit, Owen, None
 };
-scrambling scrambling_type = RandomDigit;
+const scrambling scrambling_type = Owen;
 
 
 
@@ -34,11 +31,24 @@ scrambling scrambling_type = RandomDigit;
 
 
 
-const std::string random_generator_type_name = random_generator_type == Halton ? "Halton" : "Sobol";
 
-static const std::string file_name_dim_test = "../DimensionsTest/" + std::string(scrambling_type == RandomDigit ? "RandomDigits/" : "")
-         + random_generator_type_name + "_" + std::to_string(MAX_PATHS) + "_" +
-        std::to_string(MAX_BOUNCE);
+
+
+
+
+
+static const std::string random_generator_type_name =
+        random_generator_type == Halton ? "Halton" :
+        random_generator_type == Sobol ? "Sobol" :
+        "NewOne";
+static const std::string scrambling_type_name =
+        scrambling_type == RandomDigit ? "RandomDigits/" :
+        scrambling_type == Owen ? "Owen/" :
+        "";
+
+static const std::string file_name_dim_test = "../DimensionsTest/" + scrambling_type_name
+                                              + random_generator_type_name + "_" + std::to_string(MAX_PATHS) + "_" +
+                                              std::to_string(MAX_BOUNCE);
 std::ofstream allDimensions(file_name_dim_test + "_allDimensions.txt");
 std::ofstream ePixelX(file_name_dim_test + "_ePixelX_0.txt");
 std::ofstream ePixelY(file_name_dim_test + "_ePixelY_1.txt");

@@ -38,8 +38,10 @@ inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixel
     return sampler;
 }
 
-static const std::vector<uint32_t> RandomDigitScrambling = {432184344, 3123020165, 1712321849, 712353037, 2387471059, 2384934338,
-                                                            823984981, 455117590, 631653891, 473658509, 810543653, 3849875751,
+static const std::vector<uint32_t> RandomDigitScrambling = {432184344, 3123020165, 1712321849, 712353037, 2387471059,
+                                                            2384934338,
+                                                            823984981, 455117590, 631653891, 473658509, 810543653,
+                                                            3849875751,
                                                             1859591936};
 
 template<SampleDimension Dim>
@@ -55,12 +57,17 @@ inline float random(SamplerState &currentState) {
         result = HaltonRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
     } else if (random_generator_type == Sobol) {
         if (scrambling_type == RandomDigit) {
-            result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base, RandomDigitScrambling[(uint32_t)Dim]);
+            result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
+                               RandomDigitScrambling[(uint32_t) Dim]);
+        } else if (scrambling_type == Owen) {
+            result = SobolOwenScrambling(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
+                                         RandomDigitScrambling[(uint32_t) Dim]);
         } else {
             result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
         }
     }
 
+    uint32_t Helper = uint32_t(Dim);
     if (currentState.seed == SEED + CHECK_PIXEL_X * IMAGE_WIDTH + CHECK_PIXEL_Y) {
         switch (Dim) {
             case SampleDimension::ePixelX:

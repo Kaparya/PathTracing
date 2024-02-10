@@ -1,13 +1,24 @@
 import matplotlib.pyplot as plt
 
+
+
 name = "Sobol"
 max_path = 256
 max_bounce = 8
-scrambling_type = "RandomDigits"
+scrambling_type = "Owen"
+
+
+
+
+
+
+
 
 config_str = name + "_" + str(max_path) + "_" + str(max_bounce) + "_"
-if scrambling_type == "RandomDigits":
+
+if scrambling_type != "":
     config_str = scrambling_type + "/" + config_str
+
 
 fig, axs = plt.subplots(1, 3, dpi=150)
 fig.suptitle("Dimensions Test")
@@ -75,8 +86,8 @@ axs[2].set_box_aspect(1)
 
 config_str = name + "/" + str(max_path) + "_" + str(max_bounce) + ".png"
 
-if scrambling_type == "RandomDigits":
-    config_str = "RandomDigits/" + config_str
+if scrambling_type != "":
+    config_str = scrambling_type + "/" + config_str
 
 plt.savefig(config_str, bbox_inches='tight')
 plt.show()
