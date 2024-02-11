@@ -21,7 +21,7 @@ const random_generator random_generator_type = Halton;
 enum scrambling : int {
     RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
 };
-const scrambling scrambling_type = OwenFinal;
+const scrambling scrambling_type = RandomDigit;
 
 
 

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 name = "Halton"
 max_path = 256
 max_bounce = 8
-scrambling_type = "OwenFinal"
+scrambling_type = "RandomDigits"
 
 config_str = name + "_" + str(max_path) + "_" + str(max_bounce) + "_"
 
@@ -38,12 +38,12 @@ axs[1, 5].set_box_aspect(3 / 1)
 # ePixel scatter + histograms
 coords_x = []
 coords_y = []
-data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "ePixelX_0.txt", "r")
+data_x = open("../WorkingProject/DimensionsTest/" + config_str + "ePixelX_0.txt", "r")
 for line in data_x:
     help = line.split()
     coords_x.append(float(help[0]))
 
-data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "ePixelY_1.txt", "r")
+data_y = open("../WorkingProject/DimensionsTest/" + config_str + "ePixelY_1.txt", "r")
 for line in data_y:
     help = line.split()
     coords_y.append(float(help[0]))
@@ -64,12 +64,12 @@ axs[1, 1].set_ylabel("1 dim")
 # eLightPoint scatter + histograms
 coords_x.clear()
 coords_y.clear()
-data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eLightPointX_3.txt", "r")
+data_x = open("../WorkingProject/DimensionsTest/" + config_str + "eLightPointX_3.txt", "r")
 for line in data_x:
     help = line.split()
     coords_x.append(float(help[0]))
 
-data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eLightPointY_4.txt", "r")
+data_y = open("../WorkingProject/DimensionsTest/" + config_str + "eLightPointY_4.txt", "r")
 for line in data_y:
     help = line.split()
     coords_y.append(float(help[0]))
@@ -90,12 +90,12 @@ axs[1, 3].set_ylabel("4 dim")
 # eGetRay scatter + histograms
 coords_x.clear()
 coords_y.clear()
-data_x = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eGetRayX_9.txt", "r")
+data_x = open("../WorkingProject/DimensionsTest/" + config_str + "eGetRayX_9.txt", "r")
 for line in data_x:
     help = line.split()
     coords_x.append(float(help[0]))
 
-data_y = open("/Users/kaparya/HSE/PathTracing/WorkingProject/DimensionsTest/" + config_str + "eGetRayY_10.txt", "r")
+data_y = open("../WorkingProject/DimensionsTest/" + config_str + "eGetRayY_10.txt", "r")
 for line in data_y:
     help = line.split()
     coords_y.append(float(help[0]))

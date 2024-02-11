@@ -19,8 +19,11 @@ inline float HaltonRand(uint32_t index, const uint32_t base,
     if (scrambling_type == None) {
         return std::min(value * invBaseN, 1 - 1e-10f);
     }
-    value = (value << 8) + value;
-    value = (value << 16) + value;
+    value ^= (value << 4);
+    value *= 0xb1a9;
+    value ^= (value << 8);
+    value *= 0x910ab81d;
+    value ^= (value << 16);
     switch (scrambling_type) {
         case 0:
             value ^= scramble;
