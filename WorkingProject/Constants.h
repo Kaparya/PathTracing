@@ -2,8 +2,8 @@
 
 const float EPSILON = 1e-10f;
 
-const int MAX_PATHS = 256; // 32
-const int MAX_BOUNCE = 8; // 4
+const int MAX_PATHS = 8; // 32
+const int MAX_BOUNCE = 4; // 4
 
 const int IMAGE_WIDTH = 320;
 const int IMAGE_HEIGHT = 240;
@@ -20,7 +20,7 @@ enum random_generator {
 };
 const random_generator random_generator_type = Sobol;
 
-enum scrambling {
+enum scrambling : int {
     RandomDigit, Owen, None
 };
 const scrambling scrambling_type = Owen;

@@ -1,12 +1,15 @@
+#pragma once
+
+#include "Scrambling.h"
 
 inline float HaltonRand(uint32_t value, const uint32_t base) {
-    const float invBase = (float)1 / (float)base;
-    uint64_t reversedDigits = 0;
+    const float invBase = (float) 1 / (float) base;
+    uint32_t reversedDigits = 0;
     float invBaseN = 1;
 
     while (value) {
-        uint64_t next  = value / base;
-        uint64_t digit = value - next * base;
+        uint32_t next = value / base;
+        uint32_t digit = value - next * base;
         reversedDigits = reversedDigits * base + digit;
         invBaseN *= invBase;
         value = next;

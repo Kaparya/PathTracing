@@ -4,8 +4,8 @@
 #include <fstream>
 #include "glm/glm.hpp"
 #include "../Constants.h"
-#include "Halton.h"
 #include "Sobol.h"
+#include "Halton.h"
 
 using namespace glm;
 
@@ -45,7 +45,7 @@ static const std::vector<uint32_t> RandomDigitScrambling = {432184344, 312302016
                                                             1859591936};
 
 template<SampleDimension Dim>
-inline float random(SamplerState &currentState) {
+float random(SamplerState &currentState) {
 
     const uint32_t dimension = uint32_t(Dim) + currentState.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
     static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
@@ -56,18 +56,10 @@ inline float random(SamplerState &currentState) {
     if (random_generator_type == Halton) {
         result = HaltonRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
     } else if (random_generator_type == Sobol) {
-        if (scrambling_type == RandomDigit) {
-            result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
-                               RandomDigitScrambling[(uint32_t) Dim]);
-        } else if (scrambling_type == Owen) {
-            result = SobolOwenScrambling(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
-                                         RandomDigitScrambling[(uint32_t) Dim]);
-        } else {
-            result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
-        }
+        result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
+                           RandomDigitScrambling[uint32_t(Dim)], scrambling_type);
     }
 
-    uint32_t Helper = uint32_t(Dim);
     if (currentState.seed == SEED + CHECK_PIXEL_X * IMAGE_WIDTH + CHECK_PIXEL_Y) {
         switch (Dim) {
             case SampleDimension::ePixelX:
