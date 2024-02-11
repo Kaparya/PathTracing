@@ -36,6 +36,31 @@ namespace {
 
         return value;
     }
+
+    inline uint32_t lk_hash_v2(uint32_t value, uint32_t seed) {
+
+        value += seed;
+        value ^= 0xfa381bd0;
+        value += 0x39201bd;
+        value *= 0xfb11ba93;
+        value ^= value * 0x1884;
+        value ^= 0x13fd1d8e;
+        value ^= value * 0x8d22f6e6;
+        value ^= 0xf38bd101;
+
+        return value;
+    }
+
+    inline uint32_t lk_hash_final(uint32_t value, uint32_t seed) {
+
+        value ^= value * 0x3d20adea;
+        value += seed;
+        value *= (seed >> 16) | 1;
+        value ^= value * 0x05526c56;
+        value ^= value * 0x53a22864;
+
+        return value;
+    }
 }
 
 template<int scrambling_type>
@@ -48,6 +73,12 @@ inline uint32_t OwenScrambling(uint32_t value, uint32_t scramble) {
             break;
         case 2:
             value = lk_hash_v1(value, scramble);
+            break;
+        case 3:
+            value = lk_hash_v2(value, scramble);
+            break;
+        case 4:
+            value = lk_hash_final(value, scramble);
     }
     value = ReverseBits(value);
 

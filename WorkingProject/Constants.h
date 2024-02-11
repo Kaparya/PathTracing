@@ -21,9 +21,9 @@ enum random_generator {
 const random_generator random_generator_type = Sobol;
 
 enum scrambling : int {
-    RandomDigit, Owen, OwenV1, None
+    RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
 };
-const scrambling scrambling_type = OwenV1;
+const scrambling scrambling_type = OwenFinal;
 
 
 
@@ -47,6 +47,8 @@ static const std::string scrambling_type_name =
         scrambling_type == RandomDigit ? "RandomDigits/" :
         scrambling_type == Owen ? "Owen/" :
         scrambling_type == OwenV1 ? "OwenV1/" :
+        scrambling_type == OwenV2? "OwenV2/" :
+        scrambling_type == OwenFinal? "OwenFinal/" :
         "";
 
 static const std::string file_name_dim_test = "../DimensionsTest/" + scrambling_type_name
