@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 # parameters
-name = "Sobol"
+name = "Halton"
 max_path = 256
 max_bounce = 8
 scrambling_type = "OwenFinal"

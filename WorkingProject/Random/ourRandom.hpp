@@ -54,7 +54,8 @@ float random(SamplerState &currentState) {
 
     float result = 0;
     if (random_generator_type == Halton) {
-        result = HaltonRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
+        result = HaltonRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
+                            RandomDigitScrambling[uint32_t(Dim)], scrambling_type);
     } else if (random_generator_type == Sobol) {
         result = SobolRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base,
                            RandomDigitScrambling[uint32_t(Dim)], scrambling_type);

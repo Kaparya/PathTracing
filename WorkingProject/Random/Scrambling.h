@@ -63,6 +63,10 @@ namespace {
     }
 }
 
+inline float UintToFloat(uint32_t value) {
+    return std::min(1 - 1e-10f, value * 0x1p-32f);
+}
+
 template<int scrambling_type>
 inline uint32_t OwenScrambling(uint32_t value, uint32_t scramble) {
 

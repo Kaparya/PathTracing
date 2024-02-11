@@ -1,9 +1,7 @@
 #pragma once
 
-const float EPSILON = 1e-10f;
-
-const int MAX_PATHS = 256; // 32
-const int MAX_BOUNCE = 8; // 4
+const int MAX_PATHS = 256;
+const int MAX_BOUNCE = 8;
 
 const int IMAGE_WIDTH = 320;
 const int IMAGE_HEIGHT = 240;
@@ -18,7 +16,7 @@ const int CHECK_PIXEL_Y = 100;
 enum random_generator {
     Default, LinearCongruential, MersenneTwister, SubtractWithCarry, ShuffleOrder, Halton, Sobol
 };
-const random_generator random_generator_type = Sobol;
+const random_generator random_generator_type = Halton;
 
 enum scrambling : int {
     RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
@@ -61,3 +59,5 @@ std::ofstream eLightPointX(file_name_dim_test + "_eLightPointX_3.txt");
 std::ofstream eLightPointY(file_name_dim_test + "_eLightPointY_4.txt");
 std::ofstream eGetRayX(file_name_dim_test + "_eGetRayX_9.txt");
 std::ofstream eGetRayY(file_name_dim_test + "_eGetRayY_10.txt");
+
+const float EPSILON = 1e-10f;
