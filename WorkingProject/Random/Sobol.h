@@ -27,7 +27,10 @@ static float SobolRand(uint32_t index, uint32_t dimension,
             value ^= scramble;
             break;
         case 1:
-            value = OwenScrambling(value, scramble);
+            value = OwenScrambling<1>(value, scramble);
+            break;
+        case 2:
+            value = OwenScrambling<2>(value, scramble);
             break;
         default:
             break;

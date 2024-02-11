@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 
 name = "Sobol"
-max_path = 8
-max_bounce = 4
-scrambling_type = "Owen"
+max_path = 256
+max_bounce = 8
+scrambling_type = "OwenV1"
 
 
 

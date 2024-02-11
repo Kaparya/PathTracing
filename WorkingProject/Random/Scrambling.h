@@ -38,10 +38,17 @@ namespace {
     }
 }
 
+template<int scrambling_type>
 inline uint32_t OwenScrambling(uint32_t value, uint32_t scramble) {
 
     value = ReverseBits(value);
-    value = lk_hash(value, scramble);
+    switch (scrambling_type) {
+        case 1:
+            value = lk_hash(value, scramble);
+            break;
+        case 2:
+            value = lk_hash_v1(value, scramble);
+    }
     value = ReverseBits(value);
 
     return value;
