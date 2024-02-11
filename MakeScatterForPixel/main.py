@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 
 # parameters
-name = "Halton"
-max_path = 8
-max_bounce = 4
-scrambling_type = ""
+name = "Sobol"
+max_path = 256
+max_bounce = 8
+scrambling_type = "OwenFinal"
 
 config_str = name + "_" + str(max_path) + "_" + str(max_bounce) + "_"
 
