@@ -1,120 +1,50 @@
 import matplotlib.pyplot as plt
 
 # parameters
-name = "Halton"
-max_path = 256
-max_bounce = 8
-scrambling_type = "RandomDigits"
+name = "Sobol"
+max_path = 8
 
-config_str = name + "_" + str(max_path) + "_" + str(max_bounce) + "_"
+config_str = name + "_" + str(max_path)
+f = open("../TestRandom/" + config_str + ".txt", "r")
+axes_names = list(map(int, f.readline().split()))
+data = []
+for index in range(len(axes_names)):
+    data.append([])
+for line in f:
+    line_parsed = list(map(float, line.split()))
+    for index in range(0, len(line_parsed)):
+        data[index].append(line_parsed[index])
 
-if scrambling_type != "":
-    config_str = scrambling_type + "/" + config_str
 
+build_dimensions = [0, 1, 3, 4, 9, 10]
 
 
 # plot settings
-fig, axs = plt.subplots(2, 6, dpi=150, sharex="col", sharey="row",
+fig, axs = plt.subplots(2, len(build_dimensions), dpi=300, sharex="col", sharey="row",
                         gridspec_kw=dict(height_ratios=[1, 3],
-                                         width_ratios=[3, 1, 3, 1, 3, 1]))
+                                         width_ratios=[3, 1] * (len(build_dimensions) // 2)))
 fig.suptitle("Dimensions Test")
 fig.tight_layout()
 
-axs[0, 1].set_visible(False)
-axs[0, 0].set_box_aspect(1 / 3)
-axs[1, 0].set_box_aspect(1)
-axs[1, 1].set_box_aspect(3 / 1)
-axs[0, 3].set_visible(False)
-axs[0, 2].set_box_aspect(1 / 3)
-axs[1, 2].set_box_aspect(1)
-axs[1, 3].set_box_aspect(3 / 1)
-axs[0, 5].set_visible(False)
-axs[0, 4].set_box_aspect(1 / 3)
-axs[1, 4].set_box_aspect(1)
-axs[1, 5].set_box_aspect(3 / 1)
+for index in range(0, len(build_dimensions), 2):
+    axs[0, index + 1].set_visible(False)
+    axs[0, index].set_box_aspect(1 / 3)
+    axs[1, index].set_box_aspect(1)
+    axs[1, index + 1].set_box_aspect(3 / 1)
 
+    axs[1, index].scatter(data[index], data[index + 1], s=2)
+    axs[1, index].set_title(f"{build_dimensions[index]}/{build_dimensions[index + 1]} dim")
+    axs[1, index].set_xlim(0, 1)
+    axs[1, index].set_ylim(0, 1)
+    axs[1, index].set_box_aspect(1)
 
+    axs[0, index].hist(data[index], bins=50, range=(0, 1))
+    axs[0, index].set_xlabel(f"{build_dimensions[index]} dim")
+    axs[0, index].set_xlim(0, 1)
 
-# ePixel scatter + histograms
-coords_x = []
-coords_y = []
-data_x = open("../WorkingProject/DimensionsTest/" + config_str + "ePixelX_0.txt", "r")
-for line in data_x:
-    help = line.split()
-    coords_x.append(float(help[0]))
+    axs[1, index + 1].hist(data[index + 1], orientation="horizontal", bins=50, range=(0, 1))
+    axs[1, index + 1].set_ylabel(f"{build_dimensions[index + 1]} dim")
+    axs[1, index + 1].set_ylim(0, 1)
 
-data_y = open("../WorkingProject/DimensionsTest/" + config_str + "ePixelY_1.txt", "r")
-for line in data_y:
-    help = line.split()
-    coords_y.append(float(help[0]))
-
-axs[1, 0].scatter(coords_x, coords_y, s=3)
-axs[1, 0].set_title("ePixel (0/1 dim)")
-axs[1, 0].set_xlim(0, 1)
-axs[1, 0].set_ylim(0, 1)
-axs[1, 0].set_box_aspect(1)
-
-axs[0, 0].hist(coords_x, bins=10, range=(0, 1))
-axs[0, 0].set_xlabel("0 dim")
-axs[1, 1].hist(coords_y, orientation="horizontal", bins=10, range=(0, 1))
-axs[1, 1].set_ylabel("1 dim")
-
-
-
-# eLightPoint scatter + histograms
-coords_x.clear()
-coords_y.clear()
-data_x = open("../WorkingProject/DimensionsTest/" + config_str + "eLightPointX_3.txt", "r")
-for line in data_x:
-    help = line.split()
-    coords_x.append(float(help[0]))
-
-data_y = open("../WorkingProject/DimensionsTest/" + config_str + "eLightPointY_4.txt", "r")
-for line in data_y:
-    help = line.split()
-    coords_y.append(float(help[0]))
-
-axs[1, 2].scatter(coords_x, coords_y, s=3)
-axs[1, 2].set_title("eLightPoint (3/4 dim)")
-axs[1, 2].set_xlim(0, 1)
-axs[1, 2].set_ylim(0, 1)
-axs[1, 2].set_box_aspect(1)
-
-axs[0, 2].hist(coords_x, bins=10, range=(0, 1))
-axs[0, 2].set_xlabel("3 dim")
-axs[1, 3].hist(coords_y, orientation="horizontal", bins=10, range=(0, 1))
-axs[1, 3].set_ylabel("4 dim")
-
-
-
-# eGetRay scatter + histograms
-coords_x.clear()
-coords_y.clear()
-data_x = open("../WorkingProject/DimensionsTest/" + config_str + "eGetRayX_9.txt", "r")
-for line in data_x:
-    help = line.split()
-    coords_x.append(float(help[0]))
-
-data_y = open("../WorkingProject/DimensionsTest/" + config_str + "eGetRayY_10.txt", "r")
-for line in data_y:
-    help = line.split()
-    coords_y.append(float(help[0]))
-
-axs[1, 4].scatter(coords_x, coords_y, s=3)
-axs[1, 4].set_title("eGetRay (9/10 dim)")
-axs[1, 4].set_xlim(0, 1)
-axs[1, 4].set_ylim(0, 1)
-axs[1, 4].set_box_aspect(1)
-
-axs[0, 4].hist(coords_x, bins=10, range=(0, 1))
-axs[0, 4].set_xlabel("9 dim")
-axs[1, 5].hist(coords_y, orientation="horizontal", bins=10, range=(0, 1))
-axs[1, 5].set_ylabel("10 dim")
-
-config_str = name + "/" + str(max_path) + "_" + str(max_bounce) + ".png"
-
-if scrambling_type != "":
-    config_str = scrambling_type + "/" + config_str
-
-plt.savefig(config_str, bbox_inches='tight')
+plt.savefig(config_str + ".png", bbox_inches='tight')
 plt.show()
