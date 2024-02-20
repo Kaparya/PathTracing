@@ -1,10 +1,14 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <random>
 
 #include "UsefulStaff.h"
 #include "Halton.h"
 #include "Sobol.h"
+
+const uint32_t SCREEN_WIDTH = 320;
+const uint32_t SCREEN_HEIGHT = 240;
 
 float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
 
@@ -27,39 +31,50 @@ int main() {
 
     size_t number_of_points;
     size_t generator_input;
-    std::cout << "Input the number of points / generator type / number of dimensions:\n";
+    size_t number_of_pixels;
+    std::cout << "Input the number of points / generator type / number of pixels to test:\n";
     std::cin >> number_of_points;
     std::cin >> generator_input;
+    std::cin >> number_of_pixels;
     Generator generator;
-    std::string string_generator;
+    std::string string_generator = "../Results/";
     switch (generator_input) {
         case 0:
             generator = Generator::Halton;
-            string_generator = "Halton_";
+            string_generator += "Halton_";
             break;
         case 1:
             generator = Generator::Sobol;
-            string_generator = "Sobol_";
+            string_generator += "Sobol_";
             break;
         default:
             break;
     }
 
-    std::string output_name = "../" + string_generator + std::to_string(number_of_points) + ".txt";
-    std::ofstream output(output_name);
+    std::string output_name = string_generator + std::to_string(number_of_points) + ".txt";
+    std::ofstream output;
+    output.open(output_name);
+    output << number_of_pixels << '\n';
 
-    for (uint32_t dimension = 0; dimension < (uint32_t)SampleDimension::eNUM_DIMENSIONS; ++dimension) {
-        output << std::setw(11) << dimension;
-    }
-    output << std::endl;
-    for (uint32_t index = 0; index < number_of_points; ++index) {
-        for (uint32_t dimension = 0; dimension < (uint32_t)SampleDimension::eNUM_DIMENSIONS; ++dimension) {
-            SamplerState state = {100, index};
-            float value = random(state, generator, dimension);
-            output << std::fixed << std::setprecision(8) << value << ' ';
-            std::to_string(dimension);
+    for (auto pixel = 0; pixel < number_of_pixels; ++pixel) {
+        uint32_t seed = rand() % (SCREEN_HEIGHT * SCREEN_WIDTH);
+        output << seed / SCREEN_WIDTH << ' ' << seed % SCREEN_WIDTH << '\n';
+        for (uint32_t dimension = 0; dimension < (uint32_t) SampleDimension::eNUM_DIMENSIONS; ++dimension) {
+            output << std::setw(11) << dimension;
         }
         output << '\n';
+
+        for (uint32_t index = 0; index < number_of_points; ++index) {
+            for (uint32_t dimension = 0; dimension < (uint32_t) SampleDimension::eNUM_DIMENSIONS; ++dimension) {
+                SamplerState state = {seed, index};
+                float value = random(state, generator, dimension);
+                output << std::fixed << std::setprecision(8) << value << ' ';
+                std::to_string(dimension);
+            }
+            output << '\n';
+        }
     }
+
+    output.close();
     return 0;
 }
