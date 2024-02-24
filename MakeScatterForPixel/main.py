@@ -21,7 +21,8 @@ def ReadInformationForPixel(cur_index: int) -> None:
         axs[2 * cur_index + 1, 2 * index].set_box_aspect(1)
         axs[2 * cur_index + 1, 2 * index + 1].set_box_aspect(3 / 1)
 
-        axs[2 * cur_index + 1, 2 * index].scatter(data[build_dimensions[index][0]], data[build_dimensions[index][1]], s=point_size)
+        axs[2 * cur_index + 1, 2 * index].scatter(data[build_dimensions[index][0]], data[build_dimensions[index][1]],
+                                                  s=point_size)
         axs[2 * cur_index + 1, 2 * index].set_xlim(0, 1)
         axs[2 * cur_index + 1, 2 * index].set_ylim(0, 1)
         axs[2 * cur_index + 1, 2 * index].set_box_aspect(1)
@@ -33,17 +34,18 @@ def ReadInformationForPixel(cur_index: int) -> None:
         axs[2 * cur_index, 2 * index].hist(data[build_dimensions[index][0]], bins=50, range=(0, 1))
         axs[2 * cur_index, 2 * index].set_xlim(0, 1)
 
-        axs[2 * cur_index + 1, 2 * index + 1].hist(data[build_dimensions[index][1]], orientation="horizontal", bins=50, range=(0, 1))
+        axs[2 * cur_index + 1, 2 * index + 1].hist(data[build_dimensions[index][1]], orientation="horizontal", bins=50,
+                                                   range=(0, 1))
         axs[2 * cur_index + 1, 2 * index + 1].set_ylim(0, 1)
-
 
 
 
 # parameters
 name = "Halton"
-max_path = 8
-dimensions_number = 12
-build_dimensions = [[0, 1], [3, 4], [9, 10]]
+max_path = 16
+build_dimensions = [[0, 1], [3, 4], [9, 10], [29, 31]]
+
+
 
 
 
@@ -54,12 +56,13 @@ point_size = float(1)
 if max_path == 256:
     point_size = 0.5
 
-number_of_pixels = int(f.readline())
+number_of_pixels, dimensions_number = map(int, f.readline().split())
 
 # plot settings
 fig, axs = plt.subplots(2 * number_of_pixels, len(build_dimensions) * 2, dpi=300, sharex="col", sharey="row",
                         gridspec_kw=dict(height_ratios=[1, 3] * number_of_pixels,
-                                         width_ratios=([3, 1] * len(build_dimensions))), figsize=(5, 15))
+                                         width_ratios=([3, 1] * len(build_dimensions))),
+                        figsize=(5 / 3 * len(build_dimensions), 1.5 * number_of_pixels))
 fig.tight_layout(h_pad=1.5, w_pad=1)
 
 for pixel in range(number_of_pixels):

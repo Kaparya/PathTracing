@@ -9,8 +9,8 @@ const int IMAGE_HEIGHT = 240;
 
 const uint32_t SEED = 13;
 
-const int CHECK_PIXEL_X = 100;
-const int CHECK_PIXEL_Y = 100;
+const int CHECK_PIXEL_X = 0;
+const int CHECK_PIXEL_Y = 0;
 
 
 enum random_generator {
@@ -21,7 +21,7 @@ const random_generator random_generator_type = Halton;
 enum scrambling : int {
     RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
 };
-const scrambling scrambling_type = RandomDigit;
+const scrambling scrambling_type = None;
 
 
 
