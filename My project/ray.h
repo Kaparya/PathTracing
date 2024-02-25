@@ -5,16 +5,16 @@
 
 class ray {
 public:
-    ray() = default;
+    ray() {}
 
-    ray(const point3 &origin, const vec3 direction) : origin_(origin), direction_(direction) {}
+    ray(const point3 &origin, const vec3 &direction) : origin_(origin), direction_(direction) {}
 
     point3 origin() const { return origin_; }
 
     vec3 direction() const { return direction_; }
 
-    point3 at(float time) const {
-        return origin_ + direction_ * time;
+    point3 at(double t) const {
+        return origin_ + t * direction_;
     }
 
 private:

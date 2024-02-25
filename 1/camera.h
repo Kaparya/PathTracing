@@ -1,56 +1,65 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "UsefulThings.h"
+#include "rtweekend.h"
 
 #include "color.h"
 #include "hittable.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include "AdditionalLibraries/stb_image_writer.h"
+#include "stb_image_writer.h"
 
 class camera {
 public:
     double aspect_ratio = 1.0;  // Ratio of image width over height
     int image_width = 100;  // Rendered image width in pixel count
     int samples_per_pixel = 10;   // Count of random samples for each pixel
-    point3 center;         // Camera center
 
     void render(const hittable &world) {
         initialize();
 
-        std::string rendered_image_file = "../Results/test.png";
+        std::string rendered_image_file = "../test.png";
         std::vector<uint8_t> pixels(image_height *image_width
-        *4);
-        static const double normalizeCoefficient = (1.0 / samples_per_pixel);
+        *3);
 
-        for (int row = 0; row < image_height; ++row) {
-            std::clog << "\rScanlines remaining: " << (image_height - row) << ' ' << std::flush;
+        for (int j = 0; j < image_height; ++j) {
+            std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+            for (int i = 0; i < image_width; ++i) {
+                auto pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
+                auto ray_direction = pixel_center - center;
+                ray r1(center, ray_direction);
 
-            for (int column = 0; column < image_width; ++column) {
                 color pixel_color(0, 0, 0);
                 for (int sample = 0; sample < samples_per_pixel; ++sample) {
-                    ray r = get_ray(column, row);
-                    auto help = ray_color(r, world);
-                    pixel_color += help;
+                    ray r = get_ray(i, j);
+                    pixel_color += ray_color(r, world);
                 }
-                pixel_color *= normalizeCoefficient;
+
+                auto r = pixel_color.x();
+                auto g = pixel_color.y();
+                auto b = pixel_color.z();
+
+                // Divide the color by the number of samples.
+                auto scale = 1.0 / samples_per_pixel;
+                r *= scale;
+                g *= scale;
+                b *= scale;
 
                 // Write the translated [0,255] value of each color component.
-                static const interval intensity(0, 0.999999);
-                pixels[(row * image_width + column) * 4] = static_cast<int>(intensity.clamp(pixel_color.r()) * 256);
-                pixels[(row * image_width + column) * 4 + 1] = static_cast<int>(intensity.clamp(pixel_color.g()) * 256);
-                pixels[(row * image_width + column) * 4 + 2] = static_cast<int>(intensity.clamp(pixel_color.b()) * 256);
-                pixels[(row * image_width + column) * 4 + 3] = 255;
+                static const interval intensity(0.000, 0.999);
+                pixels[(j * image_width + i) * 3] = static_cast<int>(256 * intensity.clamp(r));
+                pixels[(j * image_width + i) * 3 + 1] = static_cast<int>(256 * intensity.clamp(g));
+                pixels[(j * image_width + i) * 3 + 2] = static_cast<int>(256 * intensity.clamp(b));
             }
         }
         std::clog << "\rDone!                        \n" << std::flush;
-        stbi_write_png(rendered_image_file.c_str(), image_width, image_height, 4, pixels.data(), 0);
+        stbi_write_png(rendered_image_file.c_str(), image_width, image_height, 3, pixels.data(), 0);
     }
 
 private:
     int image_height;   // Rendered image height
+    point3 center;         // Camera center
     point3 pixel00_loc;    // Location of pixel 0, 0
     vec3 pixel_delta_u;  // Offset to pixel to the right
     vec3 pixel_delta_v;  // Offset to pixel below
@@ -58,6 +67,8 @@ private:
     void initialize() {
         image_height = static_cast<int>(image_width / aspect_ratio);
         image_height = (image_height < 1) ? 1 : image_height;
+
+        center = point3(0, 0, 0);
 
         // Determine viewport dimensions.
         auto focal_length = 1.0;
@@ -74,7 +85,7 @@ private:
 
         // Calculate the location of the upper left pixel.
         auto viewport_upper_left =
-                center - vec3(0, 0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+                center - vec3(0, 0, focal_length) - viewport_u / 2 - viewport_v / 2;
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
@@ -83,27 +94,30 @@ private:
 
         if (world.hit(r, interval(0, infinity), rec)) {
             vec3 direction = random_on_hemisphere(rec.normal);
-            return 0.5 * ray_color(ray(rec.point, direction), world);
+            return 0.5 * ray_color(ray(rec.p, direction), world);
         }
 
         vec3 unit_direction = unit_vector(r.direction());
-        double a = 0.5 * (unit_direction.y() + 1.0);
-        return (1 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
+        auto a = 0.5 * (unit_direction.y() + 1.0);
+        return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
     }
 
     ray get_ray(int i, int j) const {
         // Get a randomly sampled camera ray for the pixel at location i,j.
 
-        point3 pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
-        point3 pixel = pixel_center + pixel_sample_square();
+        auto pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
+        auto pixel_sample = pixel_center + pixel_sample_square();
 
-        return {center, pixel - center};
+        auto ray_origin = center;
+        auto ray_direction = pixel_sample - ray_origin;
+
+        return ray(ray_origin, ray_direction);
     }
 
     vec3 pixel_sample_square() const {
         // Returns a random point in the square surrounding a pixel at the origin.
-        double px = -0.5 + random_float();
-        double py = -0.5 + random_float();
+        auto px = -0.5 + random_double();
+        auto py = -0.5 + random_double();
         return (px * pixel_delta_u) + (py * pixel_delta_v);
     }
 };

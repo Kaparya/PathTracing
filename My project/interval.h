@@ -3,35 +3,35 @@
 
 class interval {
 public:
-    interval() : min_(-INF), max_(INF) {}
+    interval() : min_(+infinity), max_(-infinity) {} // Default interval is empty
 
-    interval(float min, float max) : min_(min), max_(max) {}
+    interval(double min, double max) : min_(min), max_(max) {}
 
-    bool contains(float value) const {
+    bool contains(double value) const {
         return min_ <= value && value <= max_;
     }
 
-    bool surrounds(float value) const {
+    bool surrounds(double value) const {
         return min_ < value && value < max_;
     }
 
-    float clamp(float value) const {
+    double clamp(double value) const {
         if (value < min_) { return min_; }
         if (value > max_) { return max_; }
         return value;
     }
 
-    float min() const { return min_; }
+    double min() const { return min_; }
 
-    float max() const { return max_; }
+    double max() const { return max_; }
 
     static const interval empty, universe;
 
 private:
-    float min_, max_;
+    double min_, max_;
 };
 
-const interval interval::empty(INF, -INF);
-const interval interval::universe(-INF, INF);
+const interval interval::empty(+infinity, -infinity);
+const interval interval::universe(-infinity, +infinity);
 
 #endif

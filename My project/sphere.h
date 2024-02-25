@@ -3,41 +3,46 @@
 
 #include "hittable.h"
 #include "vec3.h"
+#include "interval.h"
+#include "iomanip"
 
 class sphere : public hittable {
 public:
-    sphere(point3 center, float radius) : center_(center), radius_(radius) {}
+    sphere(point3 center, double radius) : center_(center), radius_(radius) {}
 
-    bool hit(const ray &r, interval ray_time, hit_record &record) const override {
-        auto OC = r.origin() - center_;
-        auto a = r.direction().length_squared();
-        auto half_b = dot(r.direction(), OC);
-        auto c = OC.length_squared() - radius_ * radius_;
+    bool hit(const ray &current_ray, interval ray_t, hit_record &record) const override {
+        vec3 oc = current_ray.origin() - center_;
+        double a = current_ray.direction().length_squared();
+        double half_b = dot(oc, current_ray.direction());
+        double c = oc.length_squared() - radius_ * radius_;
 
-        float discriminant = half_b * half_b - a * c;
+        double discriminant = half_b * half_b - a * c;
 
         if (discriminant < 0) {
             return false;
         }
+        double sqrtd = sqrt(discriminant);
 
-        float time = (-half_b - std::sqrt(discriminant)) / a; // nearest point
-        if (!ray_time.surrounds(time)) {
-            time = (-half_b + std::sqrt(discriminant)) / a;
-            if (!ray_time.surrounds(time)) {
+        // Find the nearest root that lies in the acceptable range.
+        double root_time = (-half_b - sqrtd) / a;
+        if (!ray_t.surrounds(root_time)) {
+            root_time = (-half_b + sqrtd) / a;
+            if (!ray_t.surrounds(root_time)) {
                 return false;
             }
         }
 
-        record.time = time;
-        record.point = r.at(time);
+        record.time = root_time;
+        record.point = current_ray.at(record.time);
         vec3 outward_normal = (record.point - center_) / radius_;
-        record.set_face_normal(r, outward_normal);
+        record.set_face_normal(current_ray, outward_normal);
+
         return true;
     }
 
 private:
     point3 center_;
-    float radius_;
+    double radius_;
 };
 
 #endif
