@@ -4,7 +4,13 @@
 #include "hittable_list.h"
 #include "sphere.h"
 
+#include "AdditionalLibraries/clock.h"
+
 int main() {
+
+    Clock clock;
+    clock.start();
+
     hittable_list world;
 
     world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
@@ -20,5 +26,8 @@ int main() {
 
 
     cam.render(world);
+
+    clock.finish();
+    std::cout << clock;
     return 0;
 }
