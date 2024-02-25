@@ -10,7 +10,7 @@ class sphere : public hittable {
 public:
     sphere(point3 center, double radius) : center_(center), radius_(radius) {}
 
-    bool hit(const ray &current_ray, interval ray_t, hit_record &record) const override {
+    bool hit(const ray &current_ray, interval time, hit_record &record) const override {
         vec3 oc = current_ray.origin() - center_;
         double a = current_ray.direction().length_squared();
         double half_b = dot(oc, current_ray.direction());
@@ -25,9 +25,9 @@ public:
 
         // Find the nearest root that lies in the acceptable range.
         double root_time = (-half_b - sqrtd) / a;
-        if (!ray_t.surrounds(root_time)) {
+        if (!time.surrounds(root_time)) {
             root_time = (-half_b + sqrtd) / a;
-            if (!ray_t.surrounds(root_time)) {
+            if (!time.surrounds(root_time)) {
                 return false;
             }
         }

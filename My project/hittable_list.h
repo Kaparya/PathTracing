@@ -4,13 +4,12 @@
 #include "hittable.h"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 class hittable_list : public hittable {
 public:
-    std::vector<std::shared_ptr<hittable>> objects;
-
-    hittable_list() {}
+    hittable_list() = default;
 
     hittable_list(std::shared_ptr<hittable> object) { add(object); }
 
@@ -35,6 +34,9 @@ public:
 
         return hit_anything;
     }
+
+private:
+    std::vector<std::shared_ptr<hittable>> objects;
 };
 
 #endif

@@ -17,13 +17,13 @@ inline double degrees_to_radians(double degrees) {
     return degrees * pi / 180.0;
 }
 
-inline double random_float() {
-    static std::uniform_real_distribution<double> distribution(0, 1);
+inline float random_float() {
+    static std::uniform_real_distribution<float> distribution(0, 1);
     static std::mt19937 generator;
     return distribution(generator);
 }
 
-inline double random_float(double min, double max) {
+inline float random_float(double min, double max) {
     // Returns a random real in [min,max).
     return min + (max - min) * random_float();
 }

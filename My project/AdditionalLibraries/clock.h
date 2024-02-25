@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CLOCK_H
+#define CLOCK_H
 
 #include <iostream>
 
@@ -23,3 +24,5 @@ private:
 inline std::ostream &operator<<(std::ostream &out, const Clock &clock) {
     return out << std::fixed << std::setprecision(2) << "\nTime working:\n" << clock.result() << " milliseconds\n";
 }
+
+#endif
