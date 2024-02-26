@@ -39,9 +39,9 @@ public:
                 pixel_color *= normalizeCoefficient;
                 // Saving color
                 static const interval intensity(0, 0.999999);
-                pixels[(row * image_width + column) * 4] = static_cast<int>(intensity.clamp(pixel_color.r()) * 256);
-                pixels[(row * image_width + column) * 4 + 1] = static_cast<int>(intensity.clamp(pixel_color.g()) * 256);
-                pixels[(row * image_width + column) * 4 + 2] = static_cast<int>(intensity.clamp(pixel_color.b()) * 256);
+                pixels[(row * image_width + column) * 4] = static_cast<int>(intensity.clamp(linear_to_gamma(pixel_color.r())) * 256);
+                pixels[(row * image_width + column) * 4 + 1] = static_cast<int>(intensity.clamp(linear_to_gamma(pixel_color.g())) * 256);
+                pixels[(row * image_width + column) * 4 + 2] = static_cast<int>(intensity.clamp(linear_to_gamma(pixel_color.b())) * 256);
                 pixels[(row * image_width + column) * 4 + 3] = 255;
             }
         }
@@ -97,8 +97,8 @@ private:
 
         hit_record rec;
 
-        if (world.hit(r, interval(0, infinity), rec)) {
-            vec3 direction = random_on_hemisphere(rec.normal);
+        if (world.hit(r, interval(0.000001, infinity), rec)) {
+            vec3 direction = rec.normal + random_unit_vector();
             return 0.5 * ray_color(ray(rec.point, direction), world, bounce - 1);
         }
 
