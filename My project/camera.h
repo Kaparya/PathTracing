@@ -98,7 +98,7 @@ private:
         hit_record rec;
 
         if (world.hit(r, interval(0.000001, infinity), rec)) {
-            vec3 direction = rec.normal + random_unit_vector();
+            vec3 direction = rec.normal + random_unit_vector() + epsilon * rec.normal;
             return 0.5 * ray_color(ray(rec.point, direction), world, bounce - 1);
         }
 
