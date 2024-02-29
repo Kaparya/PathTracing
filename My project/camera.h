@@ -18,7 +18,10 @@ public:
     int samples_per_pixel = 10;   // Count of random samples for each pixel
     int max_bounce = 10;
 
-    point3 center;         // Camera center
+    double vertical_fov = 90; // Degrees
+    point3 look_from = point3(0, 0, -1);
+    point3 look_at = point3(0, 0, 0);
+    vec3 view_up = vec3(0, 1, 0); // Can be used to zoom in/out
 
     void render(const hittable &world) {
         initialize();
@@ -56,9 +59,13 @@ private:
     vec3 pixel_delta_u_;  // Offset to pixel to the right
     vec3 pixel_delta_v_;  // Offset to pixel below
     std::string rendered_image_file_;
+    vec3 u, v, w;
+
+    point3 center;         // Camera center
 
     void initialize() {
 
+        // Initialising saving file
         int file_index = 0;
         rendered_image_file_ = "../Results/test";
         while (FILE * file = fopen((rendered_image_file_ + std::to_string(file_index) + ".png").c_str(), "r")) {
@@ -68,18 +75,29 @@ private:
         }
         rendered_image_file_ += std::to_string(file_index) + ".png";
 
-
         image_height_ = static_cast<int>(image_width / aspect_ratio);
         image_height_ = (image_height_ < 1) ? 1 : image_height_;
 
+        // Determine the camera location
+        center = look_from;
+
+        // Calculating camera basis
+        w = unit_vector(look_from - look_at);
+        u = unit_vector(cross(view_up, w));
+        v = cross(w, u);
+
         // Determine viewport dimensions.
-        auto focal_length = 1.0;
-        auto viewport_height = 2.0;
+        auto focal_length = (look_at - look_from).length();
+
+        auto theta = degrees_to_radians(vertical_fov);
+        auto h = std::tan(theta / 2);
+
+        auto viewport_height = 2 * h * focal_length;
         auto viewport_width = viewport_height * (static_cast<double>(image_width) / image_height_);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        auto viewport_u = vec3(viewport_width, 0, 0);
-        auto viewport_v = vec3(0, -viewport_height, 0);
+        auto viewport_u = viewport_width * u;
+        auto viewport_v = viewport_height * -v;
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         pixel_delta_u_ = viewport_u / image_width;
@@ -87,7 +105,7 @@ private:
 
         // Calculate the location of the upper left pixel.
         auto viewport_upper_left =
-                center - vec3(0, 0, focal_length) - (viewport_u + viewport_v) / 2.0;
+                center - (focal_length * w) - (viewport_u + viewport_v) / 2.0;
         pixel00_loc_ = viewport_upper_left;
     }
 
@@ -98,7 +116,7 @@ private:
 
         hit_record record;
 
-        if (world.hit(current_ray, interval(0.000001, infinity), record)) {
+        if (world.hit(current_ray, interval(0.001, infinity), record)) {
             ray scattered;
             color attenuation;
             if (record.material->scatter(current_ray, record, attenuation, scattered)) {

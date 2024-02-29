@@ -10,7 +10,10 @@
 
 class sphere : public hittable {
 public:
-    sphere(point3 center, double radius, std::shared_ptr<Material> current_material) : center_(center), radius_(radius), material_(std::move(current_material)) {}
+    sphere(point3 center, double radius, std::shared_ptr<Material> current_material) :
+            center_(center), radius_(radius), material_(std::move(current_material)) {}
+
+    // If the radius is negative, then all normals  points inward, as a result the sphere is hollow
 
     bool hit(const ray &current_ray, interval time, hit_record &record) const override {
         vec3 oc = current_ray.origin() - center_;

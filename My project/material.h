@@ -14,7 +14,7 @@ public:
 
 class lambertian : public Material {
 public:
-    lambertian(color albedo) : albedo_(albedo) {}
+    lambertian(const color &albedo) : albedo_(albedo) {}
 
     bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered) const override {
         vec3 scatter = record.normal + random_unit_vector();
@@ -34,7 +34,7 @@ private:
 
 class metal : public Material {
 public:
-    metal(const color &albedo, const double &fuzz) : albedo_(albedo), fuzz_(fuzz < 1 ? fuzz : 1) {}
+    metal(const color &albedo, double fuzz) : albedo_(albedo), fuzz_(fuzz < 1 ? fuzz : 1) {}
 
     bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered) const override {
         vec3 reflected = reflect(in_ray.direction(), record.normal);
@@ -46,6 +46,39 @@ public:
 private:
     color albedo_;
     double fuzz_;
+};
+
+class dielectric : public Material {
+public:
+    dielectric(double index_of_refraction) : index_of_refraction_(index_of_refraction) {}
+
+    bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered) const override {
+        attenuation = color(1, 1, 1);
+        double refraction_ratio = record.front_face ? (1.0 / index_of_refraction_) : index_of_refraction_;
+
+        auto unit_in_direction = unit_vector(in_ray.direction());
+        double cos_theta = std::fmin(dot(-unit_in_direction, record.normal), 1.0);
+        double sin_theta = std::sqrt(1 - cos_theta * cos_theta);
+
+        vec3 direction;
+        if (refraction_ratio * sin_theta > 1.0 || reflectance(cos_theta, refraction_ratio) > random_float()) {
+            direction = reflect(unit_in_direction, record.normal);
+        } else {
+            direction = refract(unit_in_direction, record.normal, refraction_ratio);
+        }
+
+        scattered = ray(record.point, direction);
+        return true;
+    }
+
+private:
+    double index_of_refraction_;
+
+    static double reflectance(double cos, double refraction_ratio) {
+        auto r0 = (1 - refraction_ratio) / (1 + refraction_ratio);
+        r0 = r0 * r0;
+        return r0 + (1 - r0) * pow((1 - cos), 5);
+    }
 };
 
 #endif
