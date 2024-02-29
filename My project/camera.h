@@ -23,6 +23,9 @@ public:
     point3 look_at = point3(0, 0, 0);
     vec3 view_up = vec3(0, 1, 0); // Can be used to zoom in/out
 
+    double defocus_angle = 0; // 0 - equal to turn off the depth of field
+    double focus_dist = 10;   // distance bet
+
     void render(const hittable &world) {
         initialize();
 
@@ -61,6 +64,9 @@ private:
     std::string rendered_image_file_;
     vec3 u, v, w;
 
+    vec3 defocus_disk_u; // horizontal
+    vec3 defocus_disk_v; // vertical
+
     point3 center;         // Camera center
 
     void initialize() {
@@ -87,12 +93,10 @@ private:
         v = cross(w, u);
 
         // Determine viewport dimensions.
-        auto focal_length = (look_at - look_from).length();
-
         auto theta = degrees_to_radians(vertical_fov);
         auto h = std::tan(theta / 2);
 
-        auto viewport_height = 2 * h * focal_length;
+        auto viewport_height = 2 * h * focus_dist;
         auto viewport_width = viewport_height * (static_cast<double>(image_width) / image_height_);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
@@ -105,8 +109,18 @@ private:
 
         // Calculate the location of the upper left pixel.
         auto viewport_upper_left =
-                center - (focal_length * w) - (viewport_u + viewport_v) / 2.0;
+                center - (focus_dist * w) - (viewport_u + viewport_v) / 2.0;
         pixel00_loc_ = viewport_upper_left;
+
+        // Camera defocus disk basis vectors.
+        auto defocus_radius = focus_dist * tan(degrees_to_radians(defocus_angle) / 2);
+        defocus_disk_u = u * defocus_radius;
+        defocus_disk_v = v * defocus_radius;
+    }
+
+    point3 defocus_disk_sample() const {
+        auto sample = random_in_unit_disk();
+        return center + (sample[0] * defocus_disk_u) + (sample[1] * defocus_disk_v);
     }
 
     color ray_color(const ray &current_ray, const hittable &world, int bounce) const {
@@ -133,8 +147,9 @@ private:
     ray get_ray(int row, int column) const {
         // Get a randomly sampled camera ray for the pixel at location row, column.
         point3 point = pixel00_loc_ + (column * pixel_delta_u_) + (row * pixel_delta_v_) + pixel_sample_square();
+        point3 origin = defocus_angle <= 0 ? center : defocus_disk_sample();
 
-        return {center, point - center};
+        return {origin, point - origin};
     }
 
     vec3 pixel_sample_square() const {
