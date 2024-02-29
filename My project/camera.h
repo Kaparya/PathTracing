@@ -5,6 +5,7 @@
 
 #include "color.h"
 #include "hittable.h"
+#include "material.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
@@ -90,19 +91,23 @@ private:
         pixel00_loc_ = viewport_upper_left;
     }
 
-    color ray_color(const ray &r, const hittable &world, int bounce) const {
+    color ray_color(const ray &current_ray, const hittable &world, int bounce) const {
         if (bounce <= 0) {
             return {0, 0, 0};
         }
 
-        hit_record rec;
+        hit_record record;
 
-        if (world.hit(r, interval(0.000001, infinity), rec)) {
-            vec3 direction = rec.normal + random_unit_vector() + epsilon * rec.normal;
-            return 0.5 * ray_color(ray(rec.point, direction), world, bounce - 1);
+        if (world.hit(current_ray, interval(0.000001, infinity), record)) {
+            ray scattered;
+            color attenuation;
+            if (record.material->scatter(current_ray, record, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, world, bounce - 1);
+            }
+            return {0, 0, 0};
         }
 
-        vec3 unit_direction = unit_vector(r.direction());
+        vec3 unit_direction = unit_vector(current_ray.direction());
         double a = 0.5 * (unit_direction.y() + 1.0);
         return (1 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
     }

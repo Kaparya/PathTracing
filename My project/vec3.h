@@ -54,6 +54,10 @@ public:
         return e_[0] * e_[0] + e_[1] * e_[1] + e_[2] * e_[2];
     }
 
+    bool near_zero() const {
+        return (fabs(e_[0]) < epsilon) && (fabs(e_[1]) < epsilon) && (fabs(e_[2]) < epsilon);
+    }
+
     static vec3 random() {
         return {random_float(), random_float(), random_float()};
     }
@@ -134,6 +138,17 @@ inline vec3 random_on_hemisphere(const vec3 &normal) {
     } else {
         return -on_unit_sphere;
     }
+}
+
+vec3 reflect(const vec3 &in_ray, const vec3 &normal) {
+    return in_ray - 2 * dot(in_ray, normal) * normal;
+}
+
+vec3 refract(const vec3& in_ray, const vec3& normal, double eta) {
+    double cos_theta = std::fmin(dot(-in_ray, normal), 1.0);
+    vec3 perpendicular = eta * (in_ray + cos_theta * normal);
+    vec3 parallel = -sqrt(std::fabs(1 - perpendicular.length_squared())) * normal;
+    return perpendicular + parallel;
 }
 
 #endif
