@@ -3,9 +3,9 @@
 
 #include "UsefulThings.h"
 
-#include "color.h"
-#include "hittable.h"
-#include "material.h"
+#include "Textures/color.h"
+#include "GeometryObjects/hittable.h"
+#include "Textures/material.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 

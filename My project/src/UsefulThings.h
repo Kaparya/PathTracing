@@ -32,7 +32,7 @@ inline float random_float(double min, double max) {
 // Common Headers
 
 #include "interval.h"
-#include "ray.h"
-#include "vec3.h"
+#include "GeometryObjects/ray.h"
+#include "GeometryObjects/vec3.h"
 
 #endif

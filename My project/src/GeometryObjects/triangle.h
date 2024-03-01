@@ -1,10 +1,10 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include "UsefulThings.h"
+#include "../UsefulThings.h"
 
 #include "hittable.h"
-#include "material.h"
+#include "../Textures/material.h"
 
 class triangle : public hittable {
 public:

@@ -2,11 +2,11 @@
 #define SPHERE_H
 
 #include <utility>
+#include <iomanip>
 
 #include "hittable.h"
 #include "vec3.h"
-#include "interval.h"
-#include "iomanip"
+#include "../interval.h"
 
 class sphere : public hittable {
 public:

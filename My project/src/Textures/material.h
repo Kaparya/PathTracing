@@ -1,7 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "UsefulThings.h"
+#include "../UsefulThings.h"
 
 class hit_record;
 

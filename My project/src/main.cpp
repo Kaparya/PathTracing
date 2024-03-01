@@ -1,11 +1,11 @@
 #include "UsefulThings.h"
 
 #include "camera.h"
-#include "color.h"
-#include "hittable_list.h"
-#include "sphere.h"
-#include "triangle.h"
-#include "material.h"
+#include "Textures/color.h"
+#include "GeometryObjects/hittable_list.h"
+#include "GeometryObjects/sphere.h"
+#include "GeometryObjects/triangle.h"
+#include "Textures/material.h"
 
 #include "AdditionalLibraries/clock.h"
 
@@ -68,9 +68,9 @@ int main() {
     camera cam;
 
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 2560;
-    cam.samples_per_pixel = 200;
-    cam.max_bounce = 20;
+    cam.image_width = 640;
+    cam.samples_per_pixel = 50;
+    cam.max_bounce = 10;
 
     cam.vertical_fov = 80;
     cam.look_from = point3(0, 6, -5);
