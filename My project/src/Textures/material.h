@@ -81,4 +81,20 @@ private:
     }
 };
 
+class light : public Material {
+public:
+    light(color current_color) : color_(current_color) {}
+
+    light(color current_color, double volume) : color_(current_color), volume_(volume) {}
+
+    bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered) const override {
+        attenuation = color_ * volume_;
+        return false;
+    }
+
+private:
+    color color_;
+    double volume_ = 1;
+};
+
 #endif
