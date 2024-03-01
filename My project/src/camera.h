@@ -44,6 +44,7 @@ public:
                 }
 
                 pixel_color *= normalizeCoefficient;
+
                 // Saving color
                 static const interval intensity(0, 0.999999);
                 pixels[(row * image_width + column) * 4] = static_cast<int>(
@@ -55,6 +56,10 @@ public:
                 pixels[(row * image_width + column) * 4 + 3] = 255;
             }
         }
+
+        our_clock.finish();
+        rendered_image_file_ += " [" + std::to_string(our_clock.result()) + " " + our_clock.clock_measure + "].png";
+
         std::clog << "\rDone!                        \n" << std::flush;
         stbi_write_png(rendered_image_file_.c_str(), image_width, image_height_, 4, pixels.data(), 0);
     }
@@ -75,14 +80,10 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 0;
+        int file_index = 11;
         rendered_image_file_ = "../Results/test";
-        while (FILE *file = fopen((rendered_image_file_ + std::to_string(file_index) + ".png").c_str(), "r")) {
-            fclose(file);
-
-            ++file_index;
-        }
-        rendered_image_file_ += std::to_string(file_index) + ".png";
+        rendered_image_file_ += std::to_string(file_index) + '_';
+        rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
 
         image_height_ = static_cast<int>(image_width / aspect_ratio);
         image_height_ = (image_height_ < 1) ? 1 : image_height_;
@@ -138,13 +139,15 @@ private:
             color attenuation;
             if (record.material->scatter(current_ray, record, attenuation, scattered)) {
                 return attenuation * ray_color(scattered, world, bounce - 1);
+            } else if (std::dynamic_pointer_cast<light>(record.material)) {
+                return attenuation;
             }
-            return {0, 0, 0};
         }
 
-        vec3 unit_direction = unit_vector(current_ray.direction());
-        double a = 0.5 * (unit_direction.y() + 1.0);
-        return (1 - a) * color(1, 1, 1) + a * color(0.5, 0.7, 1.0);
+//        vec3 unit_direction = unit_vector(current_ray.direction());
+//        double a = 0.5 * (unit_direction.y() + 1.0);
+//        return (1 - a) * color(1, 1, 1) + a * color(0.5, 0.7, 1.0);
+        return {0, 0, 0};
     }
 
     ray get_ray(int row, int column) const {

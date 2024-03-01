@@ -6,7 +6,11 @@
 #include <random>
 #include <memory>
 
+#include "AdditionalLibraries/clock.h"
+
 // Constants
+
+Clock our_clock;
 
 const double infinity = std::numeric_limits<double>::infinity();
 const double epsilon = 1e-6;
