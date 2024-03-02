@@ -13,9 +13,23 @@ int main() {
 
     camera cam;
 
+//    SPHERES
+//    cam.aspect_ratio = 16.0 / 9.0;
+//    cam.image_width = 1200;
+//    cam.samples_per_pixel = 500;
+//    cam.max_bounce = 50;
+//
+//    cam.vertical_fov = 20;
+//    cam.look_from = point3(13, 2, 3);
+//    cam.look_at = point3(0, 0, 0);
+//    cam.view_up = vec3(0, 1, 0);
+//
+//    cam.defocus_angle = 0.6;
+//    cam.focus_dist = 10.0;
+
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 640;
-    cam.samples_per_pixel = 50;
+    cam.image_width = 1920;
+    cam.samples_per_pixel = 500;
     cam.max_bounce = 20;
 
     cam.vertical_fov = 80;

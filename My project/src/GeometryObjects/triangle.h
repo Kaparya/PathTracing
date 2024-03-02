@@ -12,6 +12,9 @@ public:
                                                                                  material_(std::move(material)) {
         normal_ = unit_vector(cross(c - a, b - a));
         plane_coefficient_D_ = -dot(normal_, a);
+
+        bounding_box_ = aabb(a, b);
+        bounding_box_ = aabb(bounding_box_, aabb(a, c));
     }
 
     bool hit(const ray &current_ray, interval time, hit_record &record) const override {
@@ -53,11 +56,15 @@ public:
         return true;
     }
 
+    aabb bounding_box() const override { return bounding_box_; }
+
 private:
     std::array<point3, 3> vertexes_;
     vec3 normal_;
     double plane_coefficient_D_;
     std::shared_ptr<Material> material_;
+
+    aabb bounding_box_;
 };
 
 #endif
