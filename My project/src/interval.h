@@ -25,6 +25,12 @@ public:
 
     double max() const { return max_; }
 
+    double size() const { return max_ - min_; }
+
+    interval expand(double delta) const {
+        return {min_ - delta, max_ + delta};
+    }
+
     static const interval empty, universe;
 
 private:

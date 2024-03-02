@@ -80,7 +80,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 11;
+        int file_index = 12;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
@@ -154,8 +154,9 @@ private:
         // Get a randomly sampled camera ray for the pixel at location row, column.
         point3 point = pixel00_loc_ + (column * pixel_delta_u_) + (row * pixel_delta_v_) + pixel_sample_square();
         point3 origin = defocus_angle <= 0 ? center : defocus_disk_sample();
+        double time = random_float();
 
-        return {origin, point - origin};
+        return {origin, point - origin, time};
     }
 
     vec3 pixel_sample_square() const {

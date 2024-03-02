@@ -23,7 +23,7 @@ public:
             scatter = record.normal;
         }
 
-        scattered = ray(record.point, scatter);
+        scattered = ray(record.point, scatter, in_ray.time());
         attenuation = albedo_;
         return true;
     }
@@ -38,7 +38,7 @@ public:
 
     bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered) const override {
         vec3 reflected = reflect(in_ray.direction(), record.normal);
-        scattered = ray(record.point, reflected + fuzz_ * random_unit_vector());
+        scattered = ray(record.point, reflected + fuzz_ * random_unit_vector(), in_ray.time());
         attenuation = albedo_;
         return dot(scattered.direction(), record.normal) > 0;
     }
@@ -67,7 +67,7 @@ public:
             direction = refract(unit_in_direction, record.normal, refraction_ratio);
         }
 
-        scattered = ray(record.point, direction);
+        scattered = ray(record.point, direction, in_ray.time());
         return true;
     }
 
