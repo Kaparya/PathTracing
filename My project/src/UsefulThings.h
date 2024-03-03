@@ -13,6 +13,9 @@
 std::string current_folder = "../Assets/CornellBox/";
 std::string obj_file = "CornellBox-Original.obj";
 
+//std::string current_folder = "../Assets/Cubes/";
+//std::string obj_file = "cubes.obj";
+
 #define SAVE_RENDERED_IMAGE
 
 Clock our_clock;
