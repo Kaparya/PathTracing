@@ -7,9 +7,6 @@ public:
 
     interval(double min, double max) : min_(min), max_(max) {}
 
-    interval(const interval &first, const interval &second) : min_(fmin(first.min_, second.min_)),
-                                                              max_(fmax(first.max_, second.max_)) {}
-
     bool contains(double value) const {
         return min_ <= value && value <= max_;
     }
@@ -26,11 +23,7 @@ public:
 
     double min() const { return min_; }
 
-    double &min() { return min_; }
-
     double max() const { return max_; }
-
-    double &max() { return max_; }
 
     double size() const { return max_ - min_; }
 

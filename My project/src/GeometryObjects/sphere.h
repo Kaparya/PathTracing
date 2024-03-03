@@ -11,19 +11,11 @@
 class sphere : public hittable {
 public:
     sphere(point3 center, double radius, std::shared_ptr<Material> current_material) :
-            center_(center), radius_(radius), material_(std::move(current_material)), is_moving(false) {
-        auto radius_vector = vec3(radius, radius, radius);
-        bounding_box_ = aabb(center - radius_vector, center + radius_vector);
-    }
+            center_(center), radius_(radius), material_(std::move(current_material)), is_moving(false) {}
 
     sphere(point3 center_from, point3 center_to, double radius, std::shared_ptr<Material> current_material) :
             center_(center_from), radius_(radius), material_(std::move(current_material)),
             is_moving(true) {
-        auto radius_vector = vec3(radius, radius, radius);
-        aabb box_1(center_from - radius_vector, center_from + radius_vector);
-        aabb box_2(center_to - radius_vector, center_to + radius_vector);
-        bounding_box_ = aabb(box_1, box_2);
-
         center_shift_ = center_to - center_from;
     }
 
@@ -43,12 +35,12 @@ public:
         if (discriminant < 0) {
             return false;
         }
-        double sqrt_discriminant = sqrt(discriminant);
+        double sqrtd = sqrt(discriminant);
 
         // Find the nearest root that lies in the acceptable range.
-        double root_time = (-half_b - sqrt_discriminant) / a;
+        double root_time = (-half_b - sqrtd) / a;
         if (!time.surrounds(root_time)) {
-            root_time = (-half_b + sqrt_discriminant) / a;
+            root_time = (-half_b + sqrtd) / a;
             if (!time.surrounds(root_time)) {
                 return false;
             }
@@ -63,16 +55,12 @@ public:
         return true;
     }
 
-    aabb bounding_box() const override { return bounding_box_; }
-
 private:
     point3 center_;
     point3 center_shift_;
     double radius_;
     bool is_moving;
     std::shared_ptr<Material> material_;
-
-    aabb bounding_box_;
 
     point3 center_at(double time) const {
         return center_ + center_shift_ * time;

@@ -3,7 +3,6 @@
 
 #include "ray.h"
 #include "../interval.h"
-#include "../aabb.h"
 
 class Material;
 
@@ -28,9 +27,7 @@ class hittable {
 public:
     virtual ~hittable() = default;
 
-    virtual bool hit(const ray& current_ray, interval time, hit_record& record) const = 0;
-
-    virtual aabb bounding_box() const = 0;
+    virtual bool hit(const ray& current_ray, interval ray_t, hit_record& record) const = 0;
 };
 
 #endif

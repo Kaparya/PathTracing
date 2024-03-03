@@ -1,6 +1,6 @@
 #ifndef AABB_H
 #define AABB_H
-
+/*
 #include "UsefulThings.h"
 
 class aabb {
@@ -58,5 +58,5 @@ public:
 private:
     interval x_, y_, z_;
 };
-
+*/
 #endif

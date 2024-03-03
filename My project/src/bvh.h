@@ -1,6 +1,6 @@
 #ifndef BVH_H
 #define BVH_H
-
+/*
 #include <algorithm>
 
 #include "UsefulThings.h"
@@ -77,5 +77,5 @@ private:
     std::shared_ptr<hittable> right_;
     aabb bouncing_box_;
 };
-
+*/
 #endif
