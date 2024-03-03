@@ -61,7 +61,10 @@ public:
         rendered_image_file_ += " [" + std::to_string(our_clock.result()) + " " + our_clock.clock_measure + "].png";
 
         std::clog << "\rDone!                        \n" << std::flush;
+
+#ifdef SAVE_RENDERED_IMAGE
         stbi_write_png(rendered_image_file_.c_str(), image_width, image_height_, 4, pixels.data(), 0);
+#endif
     }
 
 private:
@@ -80,7 +83,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 12;
+        int file_index = 14;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);

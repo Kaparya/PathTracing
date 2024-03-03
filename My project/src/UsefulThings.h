@@ -10,6 +10,11 @@
 
 // Constants
 
+std::string current_folder = "../Assets/CornellBox/";
+std::string obj_file = "CornellBox-Original.obj";
+
+#define SAVE_RENDERED_IMAGE
+
 Clock our_clock;
 
 const double infinity = std::numeric_limits<double>::infinity();

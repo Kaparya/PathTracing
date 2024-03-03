@@ -13,15 +13,23 @@ int main() {
 
     camera cam;
 
-    cam.aspect_ratio = 16.0 / 9.0;
+    cam.aspect_ratio = 16.0 / 16.0;
     cam.image_width = 640;
     cam.samples_per_pixel = 50;
     cam.max_bounce = 20;
+    {
+        std::ifstream camera_data(current_folder + "data.txt");
 
-    cam.vertical_fov = 80;
-    cam.look_from = point3(0, 6, -5);
-    cam.look_at = point3(0, 3, 5);
-    cam.view_up = vec3(0, 1, 0);
+        camera_data >> cam.vertical_fov;
+        double x, y, z;
+        camera_data >> x >> y >> z;
+        cam.look_from = point3(x, y, z);
+        camera_data >> x >> y >> z;
+        cam.look_at = point3(x, y, z);
+        cam.view_up = vec3(0, 1, 0);
+
+        camera_data.close();
+    }
 
     cam.defocus_angle = 0;
     cam.focus_dist = 10.0;

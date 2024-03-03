@@ -1,6 +1,8 @@
 #ifndef SCENE_READER_H
 #define SCENE_READER_H
 
+#include <vector>
+
 #include "GeometryObjects/hittable_list.h"
 #include "UsefulThings.h"
 #include "Textures/color.h"
@@ -8,67 +10,94 @@
 #include "GeometryObjects/triangle.h"
 #include "Textures/material.h"
 
-void ReadScene(hittable_list &world) {
-    using std::make_shared;
 
-    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+#define TINYOBJLOADER_IMPLEMENTATION
 
-    auto glass = make_shared<dielectric>(1.5);
-    auto glass_rev = make_shared<dielectric>(1 / 1.5);
-    auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
-    auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.1);
+#include "AdditionalLibraries/tiny_obj_loader.h"
 
-    auto red = make_shared<lambertian>(color(0.86, 0.078, 0.0117));
-    auto green = make_shared<lambertian>(color(0.1328, 0.543, 0.1328));
-    auto blue = make_shared<lambertian>(color(0.254, 0.41, 0.8789));
 
-    auto white_light = make_shared<light>(color(1, 1, 1), 7);
-    auto purple_light = make_shared<light>(color(0.6, 0.2627, 0.898), 3);
+bool ReadScene(hittable_list &world) {
 
-    // GROUND
-    world.add(make_shared<triangle>(point3(10, 0, -10), point3(10, 0, 10), point3(-10, 0, 10), ground_material));
-    world.add(make_shared<triangle>(point3(10, 0, -10), point3(-10, 0, -10), point3(-10, 0, 10), ground_material));
+    std::cout << "Loading scene...\n";
 
-    // MIRRORS
-    world.add(make_shared<triangle>(point3(5, 0, 0), point3(0, 10, 5), point3(0, 0, 10), material3));
-    world.add(make_shared<triangle>(point3(-5, 0, 0), point3(0, 10, 5), point3(0, 0, 10), material3));
+    std::string modelPath = current_folder + obj_file;
+    std::string materialPath = current_folder;
 
-    // WALLS
-    world.add(make_shared<triangle>(point3(10, 0, -9), point3(10, 20, -9), point3(10, 0, 9), red));
-    world.add(make_shared<triangle>(point3(10, 20, 9), point3(10, 20, -9), point3(10, 0, 9), red));
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string err;
+    std::string warn;
 
-    world.add(make_shared<triangle>(point3(9, 0, 10), point3(9, 20, 10), point3(-9, 0, 10), green));
-    world.add(make_shared<triangle>(point3(-9, 20, 10), point3(9, 20, 10), point3(-9, 0, 10), green));
+    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str(), materialPath.c_str());
+    if (!warn.empty()) {
+        std::cout << warn << std::endl;
+    }
 
-    world.add(make_shared<triangle>(point3(-10, 0, -9), point3(-10, 20, 9), point3(-10, 0, 9), blue));
-    world.add(make_shared<triangle>(point3(-10, 0, -9), point3(-10, 20, 9), point3(-10, 20, -9), blue));
+    if (!err.empty()) {
+        std::cerr << err << std::endl;
+    }
 
-    //SPHERE
-    world.add(make_shared<sphere>(point3(1, 3, 1), point3(3, 3, 1), 0.5, material2));
-    world.add(make_shared<sphere>(point3(-1, 4, 7.5), 0.5, purple_light));
+    if (!ret) {
+        exit(1);
+    } else {
+        std::cout << "Loaded" << std::endl;
 
-    // UpLight
-    world.add(make_shared<triangle>(point3(2, 8, 0), point3(-2, 8, 0), point3(0, 9.5, 2), white_light));
+        printf("# of vertices   = %d\n", (int) (attrib.vertices.size()) / 3);
+        printf("# of normals    = %d\n", (int) (attrib.normals.size()) / 3);
+        printf("# of tex coords = %d\n", (int) (attrib.texcoords.size()) / 2);
+        printf("# of materials  = %d\n", (int) materials.size());
+        printf("# of shapes     = %d\n", (int) shapes.size());
 
-    // Right mirror
-    world.add(make_shared<triangle>(point3(-6, 2, 0), point3(-6, 7, 0), point3(-6, 2, 5), material3));
+        std::cout << "Scene configuration...";
 
-    // BOX
-    // front
-    world.add(make_shared<triangle>(point3(-1, 0, 0), point3(-3, 0, 0), point3(-1, 2, 0), glass));
-    world.add(make_shared<triangle>(point3(-3, 2, 0), point3(-3, 0, 0), point3(-1, 2, 0), glass_rev));
-    // left
-    world.add(make_shared<triangle>(point3(-1, 0, 0), point3(-1, 0, 2), point3(-1, 2, 0), glass));
-    world.add(make_shared<triangle>(point3(-1, 2, 0), point3(-1, 0, 2), point3(-1, 2, 2), glass));
-    // up
-    world.add(make_shared<triangle>(point3(-1, 2, 0), point3(-1, 2, 2), point3(-3, 2, 0), glass));
-    world.add(make_shared<triangle>(point3(-3, 2, 2), point3(-1, 2, 2), point3(-3, 2, 0), glass_rev));
-    // back
-    world.add(make_shared<triangle>(point3(-1, 0, 2), point3(-3, 0, 2), point3(-1, 2, 2), glass));
-    world.add(make_shared<triangle>(point3(-3, 2, 2), point3(-3, 0, 2), point3(-1, 2, 2), glass_rev));
-    // right
-    world.add(make_shared<triangle>(point3(-3, 0, 0), point3(-3, 0, 2), point3(-3, 2, 0), glass));
-    world.add(make_shared<triangle>(point3(-3, 2, 0), point3(-3, 0, 2), point3(-3, 2, 2), glass));
+        // face
+        for (const auto &shape: shapes) {
+
+            // three numbers pack (v/vt/vn)
+            for (size_t index = 0; index < shape.mesh.indices.size(); index += 3) {
+
+                vec3 position_first(attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 0],
+                                    attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 1],
+                                    attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 2]);
+
+                vec3 position_second(attrib.vertices[3 * shape.mesh.indices[index + 1].vertex_index + 0],
+                                     attrib.vertices[3 * shape.mesh.indices[index + 1].vertex_index + 1],
+                                     attrib.vertices[3 * shape.mesh.indices[index + 1].vertex_index + 2]);
+
+                vec3 position_third(attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 0],
+                                    attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 1],
+                                    attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 2]);
+
+                color our_color = color(materials[shape.mesh.material_ids[0]].ambient[0],
+                                        materials[shape.mesh.material_ids[0]].ambient[1],
+                                        materials[shape.mesh.material_ids[0]].ambient[2]);
+                auto material = std::make_shared<lambertian>(our_color);
+
+                material->ambient_color = {materials[shape.mesh.material_ids[0]].ambient[0],
+                                           materials[shape.mesh.material_ids[0]].ambient[1],
+                                           materials[shape.mesh.material_ids[0]].ambient[2]};
+                material->emission = {materials[shape.mesh.material_ids[0]].emission[0],
+                                           materials[shape.mesh.material_ids[0]].emission[1],
+                                           materials[shape.mesh.material_ids[0]].emission[2]};
+                material->diffuse_color = {materials[shape.mesh.material_ids[0]].diffuse[0],
+                                           materials[shape.mesh.material_ids[0]].diffuse[1],
+                                           materials[shape.mesh.material_ids[0]].diffuse[2]};
+                material->specular_color = {materials[shape.mesh.material_ids[0]].specular[0],
+                                            materials[shape.mesh.material_ids[0]].specular[1],
+                                            materials[shape.mesh.material_ids[0]].specular[2]};
+
+                static auto Light = std::make_shared<light>(color(0.5, 0.5, 0.5), 3);
+                if (shape.name == "light") {
+                    world.add(std::make_shared<triangle>(position_first, position_second, position_third, Light));
+                } else {
+                    world.add(std::make_shared<triangle>(position_first, position_second, position_third, material));
+                }
+            }
+        }
+
+        std::cout << "\rScene configured!     " << std::endl;
+    }
 }
 
 #endif
