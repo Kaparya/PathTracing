@@ -83,7 +83,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 14;
+        int file_index = 15;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
@@ -138,36 +138,13 @@ private:
         hit_record record;
 
         if (world.hit(current_ray, interval(0.00001, infinity), record)) {
-//            ray scattered;
-//            color attenuation;
-//            if (record.material->scatter(current_ray, record, attenuation, scattered)) {
-//                return attenuation * ray_color(scattered, world, bounce - 1);
-//            } else if (std::dynamic_pointer_cast<light>(record.material)) {
-//                return attenuation;
-//            }
-
             ray scattered;
             color attenuation;
-            record.material->scatter(current_ray, record, attenuation, scattered);
-
-            auto help = ray_color(scattered, world, bounce - 1) * 0.2;
-            record.normal = unit_vector(record.normal);
-            scattered.direction() = unit_vector(scattered.direction());
-            current_ray.direction() = unit_vector(current_ray.direction());
-
-            double diffuse_component = dot(record.material->diffuse_color, help) *
-                                       std::max(0.0, dot(record.normal, scattered.direction()));
-            double specular_component = dot(record.material->specular_color, help) *
-                                        std::max(0.0, dot(-current_ray.direction(),
-                                                          2 * dot(record.normal, scattered.direction()) *
-                                                          record.normal - scattered.direction()));
-
-            color result = record.material->ambient_color +
-                           record.material->emission +
-                           record.material->diffuse_color * diffuse_component +
-                           record.material->specular_color * specular_component;
-
-            return result;
+            if (record.material->scatter(current_ray, record, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, world, bounce - 1);
+            } else if (std::dynamic_pointer_cast<light>(record.material)) {
+                return attenuation;
+            }
         }
 
 //        vec3 unit_direction = unit_vector(current_ray.direction());

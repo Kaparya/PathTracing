@@ -57,6 +57,8 @@ bool ReadScene(hittable_list &world) {
             // three numbers pack (v/vt/vn)
             for (size_t index = 0; index < shape.mesh.indices.size(); index += 3) {
 
+                auto &cur_material = materials[shape.mesh.material_ids[0]];
+
                 vec3 position_first(attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 0],
                                     attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 1],
                                     attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 2]);
@@ -69,30 +71,34 @@ bool ReadScene(hittable_list &world) {
                                     attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 1],
                                     attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 2]);
 
-                color our_color = color(materials[shape.mesh.material_ids[0]].ambient[0],
-                                        materials[shape.mesh.material_ids[0]].ambient[1],
-                                        materials[shape.mesh.material_ids[0]].ambient[2]);
-                auto material = std::make_shared<lambertian>(our_color);
+                color our_color = color(cur_material.ambient[0],
+                                        cur_material.ambient[1],
+                                        cur_material.ambient[2]);
 
-                material->ambient_color = {materials[shape.mesh.material_ids[0]].ambient[0],
-                                           materials[shape.mesh.material_ids[0]].ambient[1],
-                                           materials[shape.mesh.material_ids[0]].ambient[2]};
-                material->emission = {materials[shape.mesh.material_ids[0]].emission[0],
-                                           materials[shape.mesh.material_ids[0]].emission[1],
-                                           materials[shape.mesh.material_ids[0]].emission[2]};
-                material->diffuse_color = {materials[shape.mesh.material_ids[0]].diffuse[0],
-                                           materials[shape.mesh.material_ids[0]].diffuse[1],
-                                           materials[shape.mesh.material_ids[0]].diffuse[2]};
-                material->specular_color = {materials[shape.mesh.material_ids[0]].specular[0],
-                                            materials[shape.mesh.material_ids[0]].specular[1],
-                                            materials[shape.mesh.material_ids[0]].specular[2]};
-
+                std::shared_ptr<Material> material;
                 static auto Light = std::make_shared<light>(color(0.5, 0.5, 0.5), 3);
-                if (shape.name == "light") {
-                    world.add(std::make_shared<triangle>(position_first, position_second, position_third, Light));
+                if (fabs(materials[shape.mesh.material_ids[0]].ior - 1) > epsilon) {
+                    material = std::make_shared<dielectric>(materials[shape.mesh.material_ids[0]].ior);
+                } else if ((cur_material.emission[0] * cur_material.emission[0] +
+                            cur_material.emission[1] * cur_material.emission[1] +
+                            cur_material.emission[2] * cur_material.emission[2]) > epsilon) {
+                    material = std::make_shared<light>(our_color,
+                                                       sqrt(cur_material.emission[0] * cur_material.emission[0] +
+                                                            cur_material.emission[1] * cur_material.emission[1] +
+                                                            cur_material.emission[2] * cur_material.emission[2]));
+                } else if (sqrt(cur_material.specular[0] * cur_material.specular[0] +
+                                cur_material.specular[1] * cur_material.specular[1] +
+                                cur_material.specular[2] * cur_material.specular[2]) > 1.4) {
+                    material = std::make_shared<metal>(
+                            color(cur_material.diffuse[0], cur_material.diffuse[1], cur_material.diffuse[2]),
+                            cur_material.shininess / 1000.0);
                 } else {
-                    world.add(std::make_shared<triangle>(position_first, position_second, position_third, material));
+                    material = std::make_shared<lambertian>(color(cur_material.diffuse[0],
+                                                                  cur_material.diffuse[1],
+                                                                  cur_material.diffuse[2]));
                 }
+
+                world.add(std::make_shared<triangle>(position_first, position_second, position_third, material));
             }
         }
 
