@@ -18,7 +18,7 @@
 
 bool ReadScene(hittable_list &world) {
 
-    std::cout << "Loading scene...\n";
+    std::cout << "Loading scene...";
 
     std::string modelPath = current_folder + obj_file;
     std::string materialPath = current_folder;
@@ -41,7 +41,7 @@ bool ReadScene(hittable_list &world) {
     if (!ret) {
         exit(1);
     } else {
-        std::cout << "Loaded" << std::endl;
+        std::cout << "\rLoaded" << std::endl;
 
         printf("# of vertices   = %d\n", (int) (attrib.vertices.size()) / 3);
         printf("# of normals    = %d\n", (int) (attrib.normals.size()) / 3);

@@ -15,8 +15,8 @@ class camera {
 public:
     double aspect_ratio = 1.0;  // Ratio of image width over height
     int image_width = 100;  // Rendered image width in pixel count
-    int samples_per_pixel = 10;   // Count of random samples for each pixel
-    int max_bounce = 10;
+    int samples_per_pixel = 50;   // Count of random samples for each pixel
+    int max_bounce = 20;
 
     double vertical_fov = 90; // Degrees
     point3 look_from = point3(0, 0, -1);

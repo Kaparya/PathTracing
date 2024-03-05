@@ -10,11 +10,14 @@
 
 // Constants
 
-std::string current_folder = "../Assets/CornellBox/";
-std::string obj_file = "CornellBox-Original.obj";
+//std::string current_folder = "../Assets/CornellBox/";
+//std::string obj_file = "CornellBox-Original.obj";
 
 //std::string current_folder = "../Assets/Cubes/";
 //std::string obj_file = "cubes.obj";
+
+std::string current_folder = "../Assets/Wolf/";
+std::string obj_file = "wolf.obj";
 
 #define SAVE_RENDERED_IMAGE
 
