@@ -57,7 +57,7 @@ bool ReadScene(hittable_list &world) {
             // three numbers pack (v/vt/vn)
             for (size_t index = 0; index < shape.mesh.indices.size(); index += 3) {
 
-                auto &cur_material = materials[shape.mesh.material_ids[0]];
+                auto &cur_material = materials[shape.mesh.material_ids.back()];
 
                 vec3 position_first(attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 0],
                                     attrib.vertices[3 * shape.mesh.indices[index].vertex_index + 1],
@@ -88,7 +88,7 @@ bool ReadScene(hittable_list &world) {
                                                             cur_material.emission[2] * cur_material.emission[2]));
                 } else if (sqrt(cur_material.specular[0] * cur_material.specular[0] +
                                 cur_material.specular[1] * cur_material.specular[1] +
-                                cur_material.specular[2] * cur_material.specular[2]) > 1.4) {
+                                cur_material.specular[2] * cur_material.specular[2]) > 0) {
                     material = std::make_shared<metal>(
                             color(cur_material.diffuse[0], cur_material.diffuse[1], cur_material.diffuse[2]),
                             cur_material.shininess / 1000.0);
@@ -98,7 +98,14 @@ bool ReadScene(hittable_list &world) {
                                                                   cur_material.diffuse[2]));
                 }
 
-                world.add(std::make_shared<triangle>(position_first, position_second, position_third, material));
+//                if (shape.name == "tallBox") {
+//                    world.add(std::make_shared<triangle>(position_first, position_second, position_third,
+//                                                         position_first + vec3(0, 0.2, 0),
+//                                                         position_second + vec3(0, 0.2, 0),
+//                                                         position_third + vec3(0, 0.2, 0), material));
+//                } else {
+                    world.add(std::make_shared<triangle>(position_first, position_second, position_third, material));
+//                }
             }
         }
 

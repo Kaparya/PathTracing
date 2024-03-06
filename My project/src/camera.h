@@ -83,7 +83,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 15;
+        int file_index = 17;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
