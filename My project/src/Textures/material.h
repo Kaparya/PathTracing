@@ -11,14 +11,14 @@ public:
 
     virtual bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered) const = 0;
 
-    vec3 ambient_color;     // Ka
-    vec3 emission;          // Ke
-    vec3 diffuse_color;     // Kd
-    vec3 specular_color;    // Ks
-    double specular_exponent = 10; // Ns
-    double Tr = 0;          // transparency
-    double d = 1 - Tr;      // dissolve
-    double Ni = 1;              // refraction index
+//    vec3 ambient_color;     // Ka
+//    vec3 emission;          // Ke
+//    vec3 diffuse_color;     // Kd
+//    vec3 specular_color;    // Ks
+//    double specular_exponent = 10; // Ns
+//    double Tr = 0;          // transparency
+//    double d = 1 - Tr;      // dissolve
+//    double Ni = 1;              // refraction index
 };
 
 class lambertian : public Material {

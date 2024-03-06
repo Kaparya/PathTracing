@@ -8,13 +8,27 @@
 
 class triangle : public hittable {
 public:
-    triangle(point3 a, point3 b, point3 c, std::shared_ptr<Material> material) : vertexes_{a, b, c},
-                                                                                 material_(std::move(material)) {
-        normal_ = unit_vector(cross(c - a, b - a));
-        plane_coefficient_D_ = -dot(normal_, a);
+    triangle(point3 a, point3 b, point3 c,
+             std::shared_ptr<Material> material) : vertexes_{a, b, c}, is_moving(false),
+                                                   material_(std::move(material)) {
+    }
+
+    triangle(point3 a, point3 b, point3 c,
+             point3 a_to, point3 b_to, point3 c_to,
+             std::shared_ptr<Material> material) : vertexes_{a, b, c},
+                                                   vertexes_shift_{a_to - a, b_to - b, c_to - c},
+                                                   is_moving(true),
+                                                   material_(std::move(material)) {
     }
 
     bool hit(const ray &current_ray, interval time, hit_record &record) const override {
+
+        point3 a = is_moving ? a_at(current_ray.time()) : vertexes_[0];
+        point3 b = is_moving ? b_at(current_ray.time()) : vertexes_[1];
+        point3 c = is_moving ? c_at(current_ray.time()) : vertexes_[2];
+
+        vec3 normal_ = unit_vector(cross(c - a, b - a));
+        double plane_coefficient_D_ = -dot(normal_, a);
 
         double normal_dot_direction = dot(normal_, unit_vector(current_ray.direction()));
         if (fabs(normal_dot_direction) < epsilon) {
@@ -29,10 +43,6 @@ public:
         }
 
         point3 point = current_ray.at(intersection_time);
-        point3 a, b, c;
-        a = vertexes_[0];
-        b = vertexes_[1];
-        c = vertexes_[2];
 
         bool point_inside = (dot(normal_, cross(b - a, point - a)) < 0) &&
                             (dot(normal_, cross(c - b, point - b)) < 0) &&
@@ -55,9 +65,21 @@ public:
 
 private:
     std::array<point3, 3> vertexes_;
-    vec3 normal_;
-    double plane_coefficient_D_;
+    std::array<point3, 3> vertexes_shift_;
+    bool is_moving;
     std::shared_ptr<Material> material_;
+
+    point3 a_at(double time) const {
+        return vertexes_[0] + vertexes_shift_[0] * time;
+    }
+
+    point3 b_at(double time) const {
+        return vertexes_[1] + vertexes_shift_[1] * time;
+    }
+
+    point3 c_at(double time) const {
+        return vertexes_[2] + vertexes_shift_[2] * time;
+    }
 };
 
 #endif

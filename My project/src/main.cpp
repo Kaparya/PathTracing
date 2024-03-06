@@ -13,10 +13,10 @@ int main() {
 
     camera cam;
 
-    cam.aspect_ratio = 16.0 / 16.0;
+    cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 640;
     cam.samples_per_pixel = 100;
-    cam.max_bounce = 20;
+    cam.max_bounce = 5;
 
     {
         std::ifstream camera_data(current_folder + "data.txt");
