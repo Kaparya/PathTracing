@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "../Random/random_numbers.h"
+
 class vec3 {
 public:
     vec3() : e_{0, 0, 0} {}
@@ -58,14 +60,6 @@ public:
         return (fabs(e_[0]) < epsilon) && (fabs(e_[1]) < epsilon) && (fabs(e_[2]) < epsilon);
     }
 
-    static vec3 random() {
-        return {random_float(), random_float(), random_float()};
-    }
-
-    static vec3 random(double min, double max) {
-        return {random_float(min, max), random_float(min, max), random_float(min, max)};
-    }
-
 private:
     double e_[3];
 };
@@ -118,30 +112,33 @@ inline vec3 unit_vector(vec3 v) {
     return v / v.length();
 }
 
-inline vec3 random_in_unit_sphere() {
+inline vec3 random_in_unit_sphere(SamplerState &state) {
     while (true) {
-        auto p = vec3::random(-1, 1);
+        auto p = vec3(random_float<SampleDimension::ePixelX>(state) * 2 - 1,
+                      random_float<SampleDimension::ePixelY>(state) * 2 - 1,
+                      random_float<SampleDimension::eBSDF1>(state) * 2 - 1);
         if (p.length_squared() < 1) {
             return p;
         }
     }
 }
 
-inline vec3 random_in_unit_disk() {
+inline vec3 random_in_unit_disk(SamplerState &state) {
     while (true) {
-        auto p = vec3(random_float(-1, 1), random_float(-1, 1), 0);
+        auto p = vec3(random_float<SampleDimension::ePixelX>(state) * 2 - 1,
+                      random_float<SampleDimension::ePixelY>(state) * 2 - 1, 0);
         if (p.length_squared() < 1) {
             return p;
         }
     }
 }
 
-inline vec3 random_unit_vector() {
-    return unit_vector(random_in_unit_sphere());
+inline vec3 random_unit_vector(SamplerState &state) {
+    return unit_vector(random_in_unit_sphere(state));
 }
 
-inline vec3 random_on_hemisphere(const vec3 &normal) {
-    vec3 on_unit_sphere = random_unit_vector();
+inline vec3 random_on_hemisphere(const vec3 &normal, SamplerState &state) {
+    vec3 on_unit_sphere = random_unit_vector(state);
     if (dot(on_unit_sphere, normal) > 0) {// In the same hemisphere as the normal
         return on_unit_sphere;
     } else {
@@ -153,7 +150,7 @@ vec3 reflect(const vec3 &in_ray, const vec3 &normal) {
     return in_ray - 2 * dot(in_ray, normal) * normal;
 }
 
-vec3 refract(const vec3& in_ray, const vec3& normal, double eta) {
+vec3 refract(const vec3 &in_ray, const vec3 &normal, double eta) {
     double cos_theta = std::fmin(dot(-in_ray, normal), 1.0);
     vec3 perpendicular = eta * (in_ray + cos_theta * normal);
     vec3 parallel = -sqrt(std::fabs(1 - perpendicular.length_squared())) * normal;

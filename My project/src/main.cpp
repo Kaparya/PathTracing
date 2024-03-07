@@ -8,6 +8,18 @@ int main() {
 
     our_clock.start();
 
+    current_folder = "../Assets/CornellBox/";
+    obj_file = "CornellBox-Original.obj";
+
+//    current_folder = "../Assets/CornellBoxMod/";
+//    obj_file = "CornellBox-Original.obj";
+//
+//    current_folder = "../Assets/Cubes/";
+//    obj_file = "cubes.obj";
+//
+//    current_folder = "../Assets/Wolf/";
+//    obj_file = "wolf.obj";
+
     hittable_list world;
     ReadScene(world);
 
@@ -16,7 +28,8 @@ int main() {
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 640;
     cam.samples_per_pixel = 100;
-    cam.max_bounce = 5;
+    cam.max_bounce = 20;
+    cam.seed = 0;
 
     {
         std::ifstream camera_data(current_folder + "data.txt");

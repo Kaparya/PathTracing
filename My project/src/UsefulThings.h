@@ -10,17 +10,8 @@
 
 // Constants
 
-//std::string current_folder = "../Assets/CornellBox/";
-//std::string obj_file = "CornellBox-Original.obj";
-
-//std::string current_folder = "../Assets/CornellBoxMod/";
-//std::string obj_file = "CornellBox-Original.obj";
-
-//std::string current_folder = "../Assets/Cubes/";
-//std::string obj_file = "cubes.obj";
-
-std::string current_folder = "../Assets/Wolf/";
-std::string obj_file = "wolf.obj";
+std::string current_folder = "../Assets/CornellBox/";
+std::string obj_file = "CornellBox-Original.obj";
 
 #define SAVE_RENDERED_IMAGE
 
@@ -36,21 +27,11 @@ inline double degrees_to_radians(double degrees) {
     return degrees * pi / 180.0;
 }
 
-inline float random_float() {
-    static std::uniform_real_distribution<float> distribution(0, 1);
-    static std::mt19937 generator;
-    return distribution(generator);
-}
-
-inline float random_float(double min, double max) {
-    // Returns a random real in [min,max).
-    return min + (max - min) * random_float();
-}
-
 // Common Headers
 
 #include "interval.h"
 #include "GeometryObjects/ray.h"
 #include "GeometryObjects/vec3.h"
+#include "Random/random_numbers.h"
 
 #endif

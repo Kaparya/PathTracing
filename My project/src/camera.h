@@ -17,6 +17,7 @@ public:
     int image_width = 100;  // Rendered image width in pixel count
     int samples_per_pixel = 50;   // Count of random samples for each pixel
     int max_bounce = 20;
+    int seed = 10;
 
     double vertical_fov = 90; // Degrees
     point3 look_from = point3(0, 0, -1);
@@ -29,30 +30,44 @@ public:
     void render(const hittable &world) {
         initialize();
 
-        std::vector<uint8_t> pixels(4 * image_height_ * image_width);
+        std::vector<uint8_t> pixels(4 * image_height_ * image_width, 0);
         static const double normalizeCoefficient = (1.0 / samples_per_pixel);
+        std::vector<double> data(4 * image_height_ * image_width, 0);
+
+
+        for (int sample = 0; sample < samples_per_pixel; ++sample) {
+            std::clog << "\rScanlines remaining: " << (samples_per_pixel - sample) << ' ' << std::flush;
+
+            for (int row = 0; row < image_height_; ++row) {
+                for (int column = 0; column < image_width; ++column) {
+
+                    SamplerState state = initSampler(row * image_width + column, sample, seed);
+
+                    color pixel_color = ray_color(get_ray(row, column, state), world, max_bounce, state);
+
+                    data[(row * image_width + column) * 4] += pixel_color.r();
+                    data[(row * image_width + column) * 4 + 1] += pixel_color.g();
+                    data[(row * image_width + column) * 4 + 2] += pixel_color.b();
+                }
+            }
+        }
 
         for (int row = 0; row < image_height_; ++row) {
-            std::clog << "\rScanlines remaining: " << (image_height_ - row) << ' ' << std::flush;
-
             for (int column = 0; column < image_width; ++column) {
-
-                color pixel_color(0, 0, 0);
-
-                for (int sample = 0; sample < samples_per_pixel; ++sample) {
-                    pixel_color += ray_color(get_ray(row, column), world, max_bounce);
-                }
-
-                pixel_color *= normalizeCoefficient;
-
                 // Saving color
                 static const interval intensity(0, 0.999999);
                 pixels[(row * image_width + column) * 4] = static_cast<int>(
-                        intensity.clamp(linear_to_gamma(pixel_color.r())) * 256);
+                        intensity.clamp(
+                                linear_to_gamma(data[(row * image_width + column) * 4] * normalizeCoefficient)) *
+                        256);
                 pixels[(row * image_width + column) * 4 + 1] = static_cast<int>(
-                        intensity.clamp(linear_to_gamma(pixel_color.g())) * 256);
+                        intensity.clamp(
+                                linear_to_gamma(data[(row * image_width + column) * 4 + 1] * normalizeCoefficient)) *
+                        256);
                 pixels[(row * image_width + column) * 4 + 2] = static_cast<int>(
-                        intensity.clamp(linear_to_gamma(pixel_color.b())) * 256);
+                        intensity.clamp(
+                                linear_to_gamma(data[(row * image_width + column) * 4 + 2] * normalizeCoefficient)) *
+                        256);
                 pixels[(row * image_width + column) * 4 + 3] = 255;
             }
         }
@@ -83,7 +98,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 17;
+        int file_index = 18;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
@@ -125,12 +140,13 @@ private:
         defocus_disk_v = v * defocus_radius;
     }
 
-    point3 defocus_disk_sample() const {
-        auto sample = random_in_unit_disk();
+    point3 defocus_disk_sample(SamplerState &state) const {
+        auto sample = random_in_unit_disk(state);
         return center + (sample[0] * defocus_disk_u) + (sample[1] * defocus_disk_v);
     }
 
-    color ray_color(const ray &current_ray, const hittable &world, int bounce) const {
+    color ray_color(const ray &current_ray, const hittable &world, int bounce,
+                    SamplerState state) const {
         if (bounce <= 0) {
             return {0, 0, 0};
         }
@@ -140,8 +156,9 @@ private:
         if (world.hit(current_ray, interval(0.00001, infinity), record)) {
             ray scattered;
             color attenuation;
-            if (record.material->scatter(current_ray, record, attenuation, scattered)) {
-                return attenuation * ray_color(scattered, world, bounce - 1);
+            if (record.material->scatter(current_ray, record, attenuation, scattered, state)) {
+                ++state.depth;
+                return attenuation * ray_color(scattered, world, bounce - 1, state);
             } else if (std::dynamic_pointer_cast<light>(record.material)) {
                 return attenuation;
             }
@@ -153,18 +170,19 @@ private:
         return {0, 0, 0};
     }
 
-    ray get_ray(int row, int column) const {
+    ray get_ray(int row, int column, SamplerState &state) const {
         // Get a randomly sampled camera ray for the pixel at location row, column.
-        point3 point = pixel00_loc_ + (column * pixel_delta_u_) + (row * pixel_delta_v_) + pixel_sample_square();
-        point3 origin = defocus_angle <= 0 ? center : defocus_disk_sample();
-        double time = random_float();
+        point3 point = pixel00_loc_ + (column * pixel_delta_u_) + (row * pixel_delta_v_) + pixel_sample_square(state);
+        point3 origin = defocus_angle <= 0 ? center : defocus_disk_sample(state);
+        double time = random_float<SampleDimension::eRayTime>(state);
 
         return {origin, point - origin, time};
     }
 
-    vec3 pixel_sample_square() const {
+    vec3 pixel_sample_square(SamplerState &state) const {
         // Returns a random point in the square surrounding a pixel at the origin.
-        return (random_float() * pixel_delta_u_) + (random_float() * pixel_delta_v_);
+        return (random_float<SampleDimension::ePixelX>(state) * pixel_delta_u_) +
+               (random_float<SampleDimension::ePixelY>(state) * pixel_delta_v_);
     }
 };
 
