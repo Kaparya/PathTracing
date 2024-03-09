@@ -50,12 +50,13 @@ bool ReadScene(hittable_list &world) {
         printf("# of shapes     = %d\n", (int) shapes.size());
 
         std::cout << "Scene configuration...";
-
         // face
         for (const auto &shape: shapes) {
 
             // three numbers pack (v/vt/vn)
             for (size_t index = 0; index < shape.mesh.indices.size(); index += 3) {
+
+                bool NormalsExist = (shape.mesh.indices[index].normal_index != -1);
 
                 auto &cur_material = materials[shape.mesh.material_ids.back()];
 
@@ -70,6 +71,23 @@ bool ReadScene(hittable_list &world) {
                 vec3 position_third(attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 0],
                                     attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 1],
                                     attrib.vertices[3 * shape.mesh.indices[index + 2].vertex_index + 2]);
+
+                vec3 normal_first, normal_second, normal_third;
+
+                if (NormalsExist) {
+                    normal_first = {attrib.normals[3 * shape.mesh.indices[index].normal_index + 0],
+                                    attrib.normals[3 * shape.mesh.indices[index].normal_index + 1],
+                                    attrib.normals[3 * shape.mesh.indices[index].normal_index + 2]};
+
+                    normal_second = {attrib.normals[3 * shape.mesh.indices[index + 1].normal_index + 0],
+                                     attrib.normals[3 * shape.mesh.indices[index + 1].normal_index + 1],
+                                     attrib.normals[3 * shape.mesh.indices[index + 1].normal_index + 2]};
+
+                    normal_third = {attrib.normals[3 * shape.mesh.indices[index + 2].normal_index + 0],
+                                    attrib.normals[3 * shape.mesh.indices[index + 2].normal_index + 1],
+                                    attrib.normals[3 * shape.mesh.indices[index + 2].normal_index + 2]};
+                }
+
 
                 color our_color = color(cur_material.ambient[0],
                                         cur_material.ambient[1],
@@ -104,8 +122,12 @@ bool ReadScene(hittable_list &world) {
 //                                                         position_second + vec3(0, 0.2, 0),
 //                                                         position_third + vec3(0, 0.2, 0), material));
 //                } else {
+                if (NormalsExist) {
+                    world.add(std::make_shared<triangle>(position_first, position_second, position_third, material,
+                                                         normal_first, normal_second, normal_third));
+                } else {
                     world.add(std::make_shared<triangle>(position_first, position_second, position_third, material));
-//                }
+                }
             }
         }
 

@@ -99,17 +99,18 @@ class light : public Material {
 public:
     light(color current_color) : color_(current_color) {}
 
-    light(color current_color, double volume) : color_(current_color), volume_(volume) {}
+    light(color current_color, double intensity) : color_(current_color), intensity_(intensity) {}
 
     bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered,
                  SamplerState &state) const override {
-        attenuation = color_ * volume_;
+        attenuation = color_ * intensity_;
+//        attenuation *= 5 / (record.point - in_ray.origin()).length();
         return false;
     }
 
 private:
     color color_;
-    double volume_ = 1;
+    double intensity_ = 1;
 };
 
 #endif

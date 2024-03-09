@@ -1,6 +1,8 @@
 #ifndef RANDOM_NUMBERS_H
 #define RANDOM_NUMBERS_H
 
+#include "Sobol.h"
+
 enum struct SampleDimension : uint32_t {
     ePixelX,
     ePixelY,
@@ -29,24 +31,52 @@ static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixelSampleI
 }
 
 template<SampleDimension Dim>
-float random_float(SamplerState& state) {
+float random_float(SamplerState &state) {
+    float result = 0;
+
+#ifdef SOBOL
+
+    const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
+    static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
+                                              67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
+    const uint32_t base = primeNumbers[dimension & 31u];
+
+    result = SobolRand(state.seed * MAX_BOUNCE + state.sampleIdx, base);
+
+#endif
+#ifdef HALTON
+
+    const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
+    static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
+                                              67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
+    const uint32_t base = primeNumbers[dimension & 31u];
+
+    result = HaltonRand(state.seed * MAX_BOUNCE + currentState.sampleIdx, base);
+
+#endif
+#ifdef STANDART
+
     static std::uniform_real_distribution<float> distribution(0, 1);
     if (uint32_t(Dim) == 0) {
         static std::mt19937 generator(0);
-        return distribution(generator);
+        result = distribution(generator);
     } else if (uint32_t(Dim) == 1) {
         static std::mt19937 generator(10);
-        return distribution(generator);
+        result =  distribution(generator);
     } else if (uint32_t(Dim) == 5) {
         static std::mt19937 generator(50);
-        return distribution(generator);
+        result =  distribution(generator);
     } else if (uint32_t(Dim) == 6) {
         static std::mt19937 generator(60);
-        return distribution(generator);
+        result =  distribution(generator);
     } else if (uint32_t(Dim) == 9) {
         static std::mt19937 generator(90);
-        return distribution(generator);
+        result =  distribution(generator);
     }
+
+#endif
+
+    return result;
 }
 
 #endif

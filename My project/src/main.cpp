@@ -16,7 +16,10 @@ int main() {
 //
 //    current_folder = "../Assets/Cubes/";
 //    obj_file = "cubes.obj";
-//
+
+//    current_folder = "../Assets/TestNormals/";
+//    obj_file = "sphere.obj";
+
 //    current_folder = "../Assets/Wolf/";
 //    obj_file = "wolf.obj";
 
@@ -27,8 +30,9 @@ int main() {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 640;
-    cam.samples_per_pixel = 100;
-    cam.max_bounce = 20;
+    cam.samples_per_pixel = 50;
+    cam.max_bounce = 10;
+    MAX_BOUNCE = cam.max_bounce;
     cam.seed = 0;
 
     {

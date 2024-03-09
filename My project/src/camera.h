@@ -31,12 +31,11 @@ public:
         initialize();
 
         std::vector<uint8_t> pixels(4 * image_height_ * image_width, 0);
-        static const double normalizeCoefficient = (1.0 / samples_per_pixel);
         std::vector<double> data(4 * image_height_ * image_width, 0);
 
 
         for (int sample = 0; sample < samples_per_pixel; ++sample) {
-            std::clog << "\rScanlines remaining: " << (samples_per_pixel - sample) << ' ' << std::flush;
+            std::clog << "\rSamples remaining: " << (samples_per_pixel - sample) << ' ' << std::flush;
 
             for (int row = 0; row < image_height_; ++row) {
                 for (int column = 0; column < image_width; ++column) {
@@ -51,6 +50,8 @@ public:
                 }
             }
         }
+
+        static const double normalizeCoefficient = (1.0 / samples_per_pixel);
 
         for (int row = 0; row < image_height_; ++row) {
             for (int column = 0; column < image_width; ++column) {
@@ -98,7 +99,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 18;
+        int file_index = 19;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);

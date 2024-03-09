@@ -10,10 +10,12 @@
 
 // Constants
 
+int MAX_BOUNCE;
 std::string current_folder = "../Assets/CornellBox/";
 std::string obj_file = "CornellBox-Original.obj";
 
 #define SAVE_RENDERED_IMAGE
+#define STANDART
 
 Clock our_clock;
 

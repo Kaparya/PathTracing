@@ -113,23 +113,33 @@ inline vec3 unit_vector(vec3 v) {
 }
 
 inline vec3 random_in_unit_sphere(SamplerState &state) {
+    auto p = vec3(random_float<SampleDimension::ePixelX>(state) * 2 - 1,
+                  random_float<SampleDimension::ePixelY>(state) * 2 - 1,
+                  random_float<SampleDimension::eBSDF1>(state) * 2 - 1);
+    int help = 0;
+
     while (true) {
-        auto p = vec3(random_float<SampleDimension::ePixelX>(state) * 2 - 1,
-                      random_float<SampleDimension::ePixelY>(state) * 2 - 1,
-                      random_float<SampleDimension::eBSDF1>(state) * 2 - 1);
         if (p.length_squared() < 1) {
             return p;
         }
+
+        p[help] *= 0.97;
+        help = (help + 1) % 3;
     }
 }
 
 inline vec3 random_in_unit_disk(SamplerState &state) {
+    auto p = vec3(random_float<SampleDimension::ePixelX>(state) * 2 - 1,
+                  random_float<SampleDimension::ePixelY>(state) * 2 - 1, 0);
+    int help = 0;
+
     while (true) {
-        auto p = vec3(random_float<SampleDimension::ePixelX>(state) * 2 - 1,
-                      random_float<SampleDimension::ePixelY>(state) * 2 - 1, 0);
         if (p.length_squared() < 1) {
             return p;
         }
+
+        p[help] *= 0.97;
+        help = (help + 1) % 2;
     }
 }
 

@@ -3,4 +3,5 @@ project(MyProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(MyProject src/main.cpp)
+add_executable(MyProject src/main.cpp
+        src/Random/Sobol.cpp)
