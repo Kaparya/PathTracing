@@ -12,8 +12,8 @@ int main() {
     obj_file = "CornellBox-Original.obj";
 
 //    current_folder = "../Assets/CornellBoxMod/";
-//    obj_file = "CornellBox-Original.obj";
-//
+//    obj_file = "CornellBox-Mod.obj";
+
 //    current_folder = "../Assets/Cubes/";
 //    obj_file = "cubes.obj";
 
@@ -31,7 +31,7 @@ int main() {
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 640;
     cam.samples_per_pixel = 50;
-    cam.max_bounce = 10;
+    cam.max_bounce = 50;
     MAX_BOUNCE = cam.max_bounce;
     cam.seed = 0;
 

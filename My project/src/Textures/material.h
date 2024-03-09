@@ -104,8 +104,12 @@ public:
     bool scatter(const ray &in_ray, const hit_record &record, color &attenuation, ray &scattered,
                  SamplerState &state) const override {
         attenuation = color_ * intensity_;
-//        attenuation *= 5 / (record.point - in_ray.origin()).length();
+        attenuation *= 1 / (record.point - in_ray.origin()).length();
         return false;
+    }
+
+    color Color() const {
+        return color_ * intensity_;
     }
 
 private:
