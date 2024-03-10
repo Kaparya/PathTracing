@@ -63,11 +63,26 @@ float random_float(SamplerState &state) {
     } else if (uint32_t(Dim) == 1) {
         static std::mt19937 generator(10);
         result =  distribution(generator);
+    } else if (uint32_t(Dim) == 2) {
+        static std::mt19937 generator(20);
+        result =  distribution(generator);
+    } else if (uint32_t(Dim) == 3) {
+        static std::mt19937 generator(30);
+        result =  distribution(generator);
+    } else if (uint32_t(Dim) == 4) {
+        static std::mt19937 generator(40);
+        result =  distribution(generator);
     } else if (uint32_t(Dim) == 5) {
         static std::mt19937 generator(50);
         result =  distribution(generator);
     } else if (uint32_t(Dim) == 6) {
         static std::mt19937 generator(60);
+        result =  distribution(generator);
+    } else if (uint32_t(Dim) == 7) {
+        static std::mt19937 generator(70);
+        result =  distribution(generator);
+    } else if (uint32_t(Dim) == 8) {
+        static std::mt19937 generator(80);
         result =  distribution(generator);
     } else if (uint32_t(Dim) == 9) {
         static std::mt19937 generator(90);

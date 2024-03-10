@@ -94,34 +94,28 @@ bool ReadScene(hittable_list &world) {
                                         cur_material.ambient[2]);
 
                 std::shared_ptr<Material> material;
-                static auto Light = std::make_shared<light>(color(0.5, 0.5, 0.5), 3);
-                if (fabs(materials[shape.mesh.material_ids[0]].ior - 1) > epsilon) {
-                    material = std::make_shared<dielectric>(materials[shape.mesh.material_ids[0]].ior);
-                } else if ((cur_material.emission[0] * cur_material.emission[0] +
-                            cur_material.emission[1] * cur_material.emission[1] +
-                            cur_material.emission[2] * cur_material.emission[2]) > epsilon) {
-                    material = std::make_shared<light>(our_color,
-                                                       sqrt(cur_material.emission[0] * cur_material.emission[0] +
-                                                            cur_material.emission[1] * cur_material.emission[1] +
-                                                            cur_material.emission[2] * cur_material.emission[2]));
-                } else if (sqrt(cur_material.specular[0] * cur_material.specular[0] +
-                                cur_material.specular[1] * cur_material.specular[1] +
-                                cur_material.specular[2] * cur_material.specular[2]) > 0) {
-                    material = std::make_shared<metal>(
-                            color(cur_material.diffuse[0], cur_material.diffuse[1], cur_material.diffuse[2]),
-                            cur_material.shininess / 1000.0);
+                if (fabs(cur_material.specular[0]) + fabs(cur_material.specular[1]) +
+                    fabs(cur_material.specular[2]) > epsilon) {
+                    material = std::make_shared<metal>(our_color, cur_material.shininess / 900.0);
+                    material->specular_exponent = cur_material.shininess / 900.0;
+                } else if (fabs(cur_material.ior - 1.45) > epsilon) {
+                    material = std::make_shared<dielectric>(cur_material.ior);
                 } else {
-                    material = std::make_shared<lambertian>(color(cur_material.diffuse[0],
-                                                                  cur_material.diffuse[1],
-                                                                  cur_material.diffuse[2]));
+                    material = std::make_shared<lambertian>(our_color);
                 }
+                material->ambient_color = color(cur_material.ambient[0],
+                                                cur_material.ambient[1],
+                                                cur_material.ambient[2]);
+                material->specular_color = color(cur_material.specular[0],
+                                                 cur_material.specular[1],
+                                                 cur_material.specular[2]);
+                material->diffuse_color = color(cur_material.diffuse[0],
+                                                cur_material.diffuse[1],
+                                                cur_material.diffuse[2]);
+                material->emission = color(cur_material.emission[0],
+                                           cur_material.emission[1],
+                                           cur_material.emission[2]);
 
-//                if (shape.name == "tallBox") {
-//                    world.add(std::make_shared<triangle>(position_first, position_second, position_third,
-//                                                         position_first + vec3(0, 0.2, 0),
-//                                                         position_second + vec3(0, 0.2, 0),
-//                                                         position_third + vec3(0, 0.2, 0), material));
-//                } else {
                 if (NormalsExist) {
                     world.add(std::make_shared<triangle>(position_first, position_second, position_third, material,
                                                          normal_first, normal_second, normal_third));
@@ -130,6 +124,16 @@ bool ReadScene(hittable_list &world) {
                 }
             }
         }
+
+//        Cornell
+        world.addLight(std::make_shared<PointLight>(point3(0, 9.5, 0), color(0.75, 0.75, 0.75), 40));
+
+//        Scene
+//        world.addLight(std::make_shared<PointLight>(point3(0, 5, 0), color(1, 1, 1), 50));
+
+//        Wolf
+//        world.addLight(std::make_shared<PointLight>(point3(3.29, 2.29, 4.88), color(1, 1, 1), 25));
+//        world.addLight(std::make_shared<PointLight>(point3(3.29, -3.66, 4.88), color(1, 1, 1), 25));
 
         std::cout << "\rScene configured!     " << std::endl;
     }

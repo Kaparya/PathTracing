@@ -4,8 +4,12 @@
 #include "UsefulThings.h"
 
 #include "Textures/color.h"
-#include "GeometryObjects/hittable.h"
 #include "Textures/material.h"
+#include "Textures/light.h"
+
+#include "GeometryObjects/hittable.h"
+#include "GeometryObjects/hittable_list.h"
+#include "GeometryObjects/triangle.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
@@ -27,7 +31,7 @@ public:
     double defocus_angle = 0; // 0 - equal to turn off the depth of field
     double focus_dist = 10;   // distance bet
 
-    void render(const hittable &world) {
+    void render(const hittable_list &world) {
         initialize();
 
         std::vector<uint8_t> pixels(4 * image_height_ * image_width, 0);
@@ -99,7 +103,7 @@ private:
     void initialize() {
 
         // Initialising saving file
-        int file_index = 19;
+        int file_index = 21;
         rendered_image_file_ = "../Results/test";
         rendered_image_file_ += std::to_string(file_index) + '_';
         rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
@@ -146,7 +150,7 @@ private:
         return center + (sample[0] * defocus_disk_u) + (sample[1] * defocus_disk_v);
     }
 
-    color ray_color(const ray &current_ray, const hittable &world, int bounce,
+    color ray_color(const ray &current_ray, const hittable_list &world, int bounce,
                     SamplerState state) const {
         if (bounce <= 0) {
             return {0, 0, 0};
@@ -155,13 +159,46 @@ private:
         hit_record record;
 
         if (world.hit(current_ray, interval(0.00001, infinity), record)) {
+
             ray scattered;
-            color attenuation;
-            if (record.material->scatter(current_ray, record, attenuation, scattered, state)) {
+            if (record.material->scatter(current_ray, record, scattered, state)) {
+
                 ++state.depth;
-                return attenuation * ray_color(scattered, world, bounce - 1, state);
-            } else if (std::dynamic_pointer_cast<light>(record.material)) {
-                return attenuation;
+                auto accumulated_color = ray_color(scattered, world, bounce - 1, state);
+
+                color diffuse_light;
+                color specular_light;
+
+                for (const std::shared_ptr<Light> &cur_light: world.Lights()) {
+
+                    if (std::shared_ptr<PointLight> light = std::dynamic_pointer_cast<PointLight>(cur_light)) {
+                        ray light_ray(record.point, light->origin_ - record.point);
+
+                        hit_record new_record;
+                        if (!world.hit(light_ray, interval(0, 1), new_record)) {
+                            vec3 unit_light_direction = unit_vector(light_ray.direction());
+
+                            color light_intensity = light->LightIntensity(record.point);
+
+                            diffuse_light += light_intensity *
+                                             std::max(0.0, dot(unit_light_direction, record.normal));
+
+                            vec3 lightReflected =
+                                    2 * dot(record.normal, unit_light_direction) * record.normal - unit_light_direction;
+
+                            specular_light += light_intensity *
+                                              std::pow(std::max(0.0, dot(-unit_vector(current_ray.direction()),
+                                                                         lightReflected)), 100);
+                        }
+                    }
+                }
+
+                const auto &material = record.material;
+
+                return material->ambient_color * 0.01 + material->emission * 0.1 +
+                       (record.material->diffuse_color * diffuse_light +
+                        record.material->specular_color * specular_light) * 0.6 +
+                       accumulated_color * material->diffuse_color * 0.8;
             }
         }
 

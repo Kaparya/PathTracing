@@ -89,14 +89,6 @@ public:
         return true;
     }
 
-private:
-    std::array<point3, 3> vertexes_;
-    std::array<point3, 3> vertexes_shift_;
-    bool is_moving;
-    bool points_normals_;
-    std::shared_ptr<Material> material_;
-    std::array<vec3, 3> normals_;
-
     point3 a_at(double time) const {
         return vertexes_[0] + vertexes_shift_[0] * time;
     }
@@ -108,6 +100,16 @@ private:
     point3 c_at(double time) const {
         return vertexes_[2] + vertexes_shift_[2] * time;
     }
+
+
+    std::shared_ptr<Material> material_;
+
+private:
+    std::array<point3, 3> vertexes_;
+    std::array<point3, 3> vertexes_shift_;
+    bool is_moving;
+    bool points_normals_;
+    std::array<vec3, 3> normals_;
 };
 
 #endif

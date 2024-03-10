@@ -17,11 +17,17 @@ int main() {
 //    current_folder = "../Assets/Cubes/";
 //    obj_file = "cubes.obj";
 
+//    current_folder = "../Assets/Scene/";
+//    obj_file = "scene.obj";
+
 //    current_folder = "../Assets/TestNormals/";
 //    obj_file = "sphere.obj";
 
 //    current_folder = "../Assets/Wolf/";
 //    obj_file = "wolf.obj";
+
+//    current_folder = "../Assets/Wolf/";
+//    obj_file = "wolf_smooth.obj";
 
     hittable_list world;
     ReadScene(world);
@@ -30,8 +36,8 @@ int main() {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 640;
-    cam.samples_per_pixel = 50;
-    cam.max_bounce = 50;
+    cam.samples_per_pixel = 200;
+    cam.max_bounce = 20;
     MAX_BOUNCE = cam.max_bounce;
     cam.seed = 0;
 
