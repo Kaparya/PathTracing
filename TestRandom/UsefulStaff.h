@@ -1,9 +1,10 @@
 #pragma once
 
 const int MAX_BOUNCE = 8;
+size_t MAX_SAMPLE = 0;
 
 enum class Generator : uint8_t {
-    Halton, Sobol
+    Standard, Halton, BlueNoise
 };
 
 enum struct SampleDimension : uint32_t {
@@ -23,7 +24,7 @@ enum struct SampleDimension : uint32_t {
 };
 
 struct SamplerState {
-    uint32_t seed;
-    uint32_t sampleIdx;
+    uint32_t seed = 0;
+    uint32_t sampleIdx = 0;
     uint32_t depth = 0;
 };
