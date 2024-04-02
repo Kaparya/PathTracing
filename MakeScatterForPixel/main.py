@@ -41,10 +41,10 @@ def ReadInformationForPixel(cur_index: int) -> None:
 
 # parameters
 # name = "Standard"
-name = "Halton"
-# MAX_SAMPLE = 8
+name = "HaltonDigitPermuted"
+MAX_SAMPLE = 8
 # MAX_SAMPLE = 16
-MAX_SAMPLE = 256
+# MAX_SAMPLE = 256
 build_dimensions = [[0, 1], [3, 4], [9, 10]]
 
 config_str = "Results/" + name + "_" + str(MAX_SAMPLE)

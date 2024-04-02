@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <fstream>
 #include <random>
+#include <bitset>
 
 #include "UsefulStaff.h"
 
@@ -15,9 +16,8 @@ const uint32_t SCREEN_HEIGHT = 240;
 float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
 
     const uint32_t dimension = uint32_t(Dim) + currentState.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
-    static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
-                                              67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
-    const uint32_t base = primeNumbers[dimension & 31u];
+    const uint32_t base_index = dimension & 31u;
+    const uint32_t base = primeNumbers[base_index];
 
     float result = 0;
     switch (generator) {
@@ -27,6 +27,11 @@ float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
         }
         case Generator::Halton: {
             result = HaltonRand(currentState.seed * MAX_SAMPLE + currentState.sampleIdx, base);
+            break;
+        }
+        case Generator::HaltonDigitPermuted: {
+            result = HaltonRandScrambled(currentState.seed * MAX_SAMPLE + currentState.sampleIdx, base,
+                                         permutations_scrambling[base_index]);
             break;
         }
         case Generator::BlueNoise: {
@@ -45,7 +50,7 @@ int main() {
     std::cout << "Input the number of points / generator type / number of pixels to test:\n";
     std::cin >> number_of_points;
     MAX_SAMPLE = number_of_points;
-    generator_input = 1;
+    generator_input = 2;
 //    std::cin >> generator_input;
     number_of_pixels = 4;
 //    std::cin >> number_of_pixels;
@@ -61,6 +66,10 @@ int main() {
             string_generator += "Halton_";
             break;
         case 2:
+            generator = Generator::HaltonDigitPermuted;
+            string_generator += "HaltonDigitPermuted_";
+            break;
+        case 3:
             generator = Generator::BlueNoise;
             string_generator += "BlueNoise_";
             break;
@@ -71,21 +80,21 @@ int main() {
     std::string output_name = string_generator + std::to_string(number_of_points) + ".txt";
     std::ofstream output;
     output.open(output_name);
-    output << number_of_pixels << ' ' << (uint32_t)SampleDimension::eNUM_DIMENSIONS << '\n';
+    output << number_of_pixels << ' ' << (uint32_t) SampleDimension::eNUM_DIMENSIONS << '\n';
 
     for (auto pixel = 0; pixel < number_of_pixels; ++pixel) {
         uint32_t seed = ((SCREEN_WIDTH * SCREEN_HEIGHT) / number_of_pixels) * pixel +
                         rand() % ((SCREEN_WIDTH * SCREEN_HEIGHT) / number_of_pixels);
 //        uint32_t seed = 0;
         output << seed / SCREEN_WIDTH << ' ' << seed % SCREEN_WIDTH << '\n';
-        for (uint32_t dimension = 0; dimension < (uint32_t)SampleDimension::eNUM_DIMENSIONS; ++dimension) {
+        for (uint32_t dimension = 0; dimension < (uint32_t) SampleDimension::eNUM_DIMENSIONS; ++dimension) {
             output << std::setw(11) << dimension;
         }
         output << '\n';
 
         for (uint32_t index = 0; index < number_of_points; ++index) {
-            for (uint32_t dimension = 0; dimension < (uint32_t)SampleDimension::eNUM_DIMENSIONS; ++dimension) {
-                SamplerState state = {seed + (uint32_t)number_of_points, index};
+            for (uint32_t dimension = 0; dimension < (uint32_t) SampleDimension::eNUM_DIMENSIONS; ++dimension) {
+                SamplerState state = {seed + (uint32_t) number_of_points, index};
                 float value = random(state, generator, dimension);
                 output << std::fixed << std::setprecision(8) << value << ' ';
             }
