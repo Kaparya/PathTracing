@@ -26,12 +26,17 @@ float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
             break;
         }
         case Generator::Halton: {
-            result = HaltonRand(currentState.seed * MAX_SAMPLE + currentState.sampleIdx, base);
+            result = HaltonRand(currentState.seed * MAX_PATHS + currentState.sampleIdx, base);
             break;
         }
-        case Generator::HaltonDigitPermuted: {
-            result = HaltonRandScrambled(currentState.seed * MAX_SAMPLE + currentState.sampleIdx, base,
-                                         permutations_scrambling[base_index]);
+        case Generator::HaltonRandomDigit: {
+            result = HaltonRandomDigitScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
+                                                 permutations_scrambling[base_index]);
+            break;
+        }
+        case Generator::HaltonOwen: {
+            result = HaltonOwenScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
+                                          permutations_scrambling[base_index], OwenHashes[base_index]);
             break;
         }
         case Generator::BlueNoise: {
@@ -49,7 +54,7 @@ int main() {
     size_t number_of_pixels;
     std::cout << "Input the number of points / generator type / number of pixels to test:\n";
     std::cin >> number_of_points;
-    MAX_SAMPLE = number_of_points;
+    MAX_PATHS = number_of_points;
     generator_input = 2;
 //    std::cin >> generator_input;
     number_of_pixels = 4;
@@ -66,10 +71,14 @@ int main() {
             string_generator += "Halton_";
             break;
         case 2:
-            generator = Generator::HaltonDigitPermuted;
-            string_generator += "HaltonDigitPermuted_";
+            generator = Generator::HaltonRandomDigit;
+            string_generator += "HaltonRandomDigit_";
             break;
         case 3:
+            generator = Generator::HaltonOwen;
+            string_generator += "HaltonOwen_";
+            break;
+        case 4:
             generator = Generator::BlueNoise;
             string_generator += "BlueNoise_";
             break;

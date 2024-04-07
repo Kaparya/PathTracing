@@ -40,11 +40,13 @@ inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixel
     return sampler;
 }
 
-static const std::vector<uint32_t> RandomDigitScrambling = {432184344, 3123020165, 1712321849, 712353037, 2387471059,
-                                                            2384934338,
-                                                            823984981, 455117590, 631653891, 473658509, 810543653,
-                                                            3849875751,
-                                                            1859591936};
+static const std::vector<uint32_t> OwenHashes = {0xb694b1f4, 0x7eb7d41c, 0x8bf4251c, 0xf0ea7299, 0xc551ce33,
+                                                 0xe75d6a6b, 0xd239f9f0, 0xcc2775fd, 0x6713db31, 0x41ecec7,
+                                                 0xae553148, 0xe17f90cd, 0xe720c4d5, 0xe697db5b, 0x1296bb16,
+                                                 0xe07d213c, 0x5fa8d144, 0xf3a5e3a8, 0x806b8b34, 0x3875e60d,
+                                                 0xfe9d2916, 0x2da800cf, 0xa43393fb, 0xb7403e48, 0xf5547c8f,
+                                                 0x324a1e77, 0x497c0deb, 0x29b4427c, 0x4b17bdff, 0xf6d78aa3,
+                                                 0x746e10b4, 0x89c231e4};
 
 template<SampleDimension Dim>
 float random(SamplerState &currentState) {
@@ -60,15 +62,18 @@ float random(SamplerState &currentState) {
             break;
         }
         case Halton: {
-            result = HaltonRand(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base);
+            result = HaltonRand(currentState.seed * MAX_PATHS + currentState.sampleIdx, base);
             break;
         }
         case HaltonRandomDigit: {
-            result = HaltonRandScrambled(currentState.seed * MAX_BOUNCE + currentState.sampleIdx, base, permutations_scrambling[base_index]);
+            result = HaltonRandomDigitScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
+                                                 permutations_scrambling[base_index]);
             break;
         }
-        case Sobol: {
-            result = SobolRand(currentState.seed * MAX_PATHS + currentState.sampleIdx, base);
+        case HaltonOwen: {
+            result = HaltonOwenScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
+                                          permutations_scrambling[base_index], OwenHashes[base_index]);
+            break;
         }
     }
 
@@ -117,6 +122,11 @@ float random(SamplerState &currentState) {
                     allRandom << result << '\n';
                     break;
                 }
+                case HaltonOwen: {
+                    static std::ofstream allRandom("../allRandomHaltonOwen.txt");
+                    allRandom << result << '\n';
+                    break;
+                }
                 case Sobol: {
                     static std::ofstream allRandom("../allRandomSobol.txt");
                     allRandom << result << '\n';
@@ -129,15 +139,6 @@ float random(SamplerState &currentState) {
 }
 
 vec3 random_in_unit_disk(SamplerState &currentState) {
-
-//    vec3 p;
-//
-//    do {
-//        p = 2.0f * vec3(random<SampleDimension::eGetRayX>(currentState),
-//                        random<SampleDimension::eGetRayY>(currentState), 0) - vec3(1, 1, 0);
-//    } while (dot(p, p) >= 1.0);
-//
-//    return p;
 
     float x = random<SampleDimension::eGetRayX>(currentState);
     float y = random<SampleDimension::eGetRayY>(currentState);

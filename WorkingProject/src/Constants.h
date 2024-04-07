@@ -7,16 +7,16 @@ const int IMAGE_WIDTH = 320;
 const int IMAGE_HEIGHT = 240;
 
 
-const uint32_t SEED = 13;
+const uint32_t SEED = MAX_PATHS + MAX_BOUNCE;
 
 const int CHECK_PIXEL_X = 0;
 const int CHECK_PIXEL_Y = 0;
 
 
 enum random_generator {
-    Standard, Halton, HaltonRandomDigit, Sobol
+    Standard, Halton, HaltonRandomDigit, HaltonOwen, Sobol
 };
-const random_generator random_generator_type = Standard;
+const random_generator random_generator_type = HaltonOwen;
 
 enum scrambling : int {
     RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
@@ -41,6 +41,7 @@ static const std::string random_generator_type_name =
         random_generator_type == Standard ? "Standard" :
         random_generator_type == Halton ? "Halton" :
         random_generator_type == HaltonRandomDigit ? "HaltonRandomDigit" :
+        random_generator_type == HaltonOwen ? "HaltonOwen" :
         random_generator_type == Sobol ? "Sobol" :
         "NewOne";
 static const std::string scrambling_type_name =
