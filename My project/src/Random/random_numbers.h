@@ -1,6 +1,8 @@
 #ifndef RANDOM_NUMBERS_H
 #define RANDOM_NUMBERS_H
 
+#define SOBOL
+
 #include "Sobol.h"
 
 enum struct SampleDimension : uint32_t {
@@ -54,7 +56,7 @@ float random_float(SamplerState &state) {
     result = HaltonRand(state.seed * MAX_BOUNCE + currentState.sampleIdx, base);
 
 #endif
-#ifdef STANDART
+#ifdef STANDARD
 
     static std::uniform_real_distribution<float> distribution(0, 1);
     if (uint32_t(Dim) == 0) {

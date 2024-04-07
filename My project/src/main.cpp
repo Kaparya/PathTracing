@@ -36,8 +36,8 @@ int main() {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 640;
-    cam.samples_per_pixel = 200;
-    cam.max_bounce = 20;
+    cam.samples_per_pixel = 10;
+    cam.max_bounce = 10;
     MAX_BOUNCE = cam.max_bounce;
     cam.seed = 0;
 
