@@ -23,6 +23,10 @@ using namespace glm;
 int main() {
     std::cout << "Started\n";
 
+    if (random_generator_type == BlueNoise) {
+        BlueNoiseGenerate();
+    }
+
     std::string modelPath = "../assets/CornellBox-Original.obj";
     std::string materialPath = "../assets/";
 

@@ -1,6 +1,8 @@
 #ifndef BLUENOISE_H
 #define BLUENOISE_H
 
+#include "../Constants.h"
+
 struct Point2F {
     float x = 0, y = 0;
 };
@@ -20,14 +22,13 @@ inline static float PointDistance(Point2F lhs, Point2F rhs) {
     return std::sqrt(x_delta * x_delta + y_delta * y_delta);
 }
 
-std::vector<Point2F> BlueNoisePoints(2048);
+std::vector<Point2F> BlueNoisePoints(MAX_PATHS * (uint32_t)SampleDimension::eNUM_DIMENSIONS);
 
 // Mitchell's Best Candidate Algorithm
 // https://blog.demofox.org/2017/10/20/generating-blue-noise-sample-points-with-mitchells-best-candidate-algorithm/
 void BlueNoiseGenerate() {
 
-    size_t samples_number = MAX_PATHS * (uint32_t)SampleDimension::eNUM_DIMENSIONS;
-    BlueNoisePoints.resize(samples_number);
+    size_t samples_number = BlueNoisePoints.size();
     uint32_t seed = 11;
     uint32_t base = 3;
 

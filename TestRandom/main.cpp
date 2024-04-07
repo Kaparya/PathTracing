@@ -40,7 +40,9 @@ float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
             break;
         }
         case Generator::BlueNoise: {
-
+            auto index = ((uint32_t) Dim * (uint32_t) SampleDimension::eNUM_DIMENSIONS + currentState.seed * MAX_PATHS +
+                          currentState.sampleIdx) % BlueNoisePoints.size();
+            result = index % 2 ? BlueNoisePoints[index].x : BlueNoisePoints[index].y;
         }
     }
 
@@ -55,7 +57,8 @@ int main() {
     std::cout << "Input the number of points / generator type / number of pixels to test:\n";
     std::cin >> number_of_points;
     MAX_PATHS = number_of_points;
-    generator_input = 2;
+    BlueNoiseGenerate();
+    generator_input = 4;
 //    std::cin >> generator_input;
     number_of_pixels = 4;
 //    std::cin >> number_of_pixels;
@@ -102,6 +105,7 @@ int main() {
         output << '\n';
 
         for (uint32_t index = 0; index < number_of_points; ++index) {
+            std::cerr << "\rPoints left: " << number_of_points - index << "          ";
             for (uint32_t dimension = 0; dimension < (uint32_t) SampleDimension::eNUM_DIMENSIONS; ++dimension) {
                 SamplerState state = {seed + (uint32_t) number_of_points, index};
                 float value = random(state, generator, dimension);
@@ -110,6 +114,7 @@ int main() {
             output << '\n';
         }
     }
+    std::cerr << "\rDone" << "                    ";
 
     output.close();
 

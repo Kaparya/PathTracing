@@ -42,8 +42,9 @@ def ReadInformationForPixel(cur_index: int) -> None:
 # parameters
 # name = "Standard"
 # name = "Halton"
-name = "HaltonRandomDigit"
+# name = "HaltonRandomDigit"
 # name = "HaltonOwen"
+name = "BlueNoise"
 # MAX_SAMPLE = 8
 # MAX_SAMPLE = 16
 MAX_SAMPLE = 256

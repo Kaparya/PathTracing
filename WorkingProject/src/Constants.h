@@ -1,7 +1,7 @@
 #pragma once
 
-const int MAX_PATHS = 8;
-const int MAX_BOUNCE = 4;
+const int MAX_PATHS = 256;
+const int MAX_BOUNCE = 8;
 
 const int IMAGE_WIDTH = 320;
 const int IMAGE_HEIGHT = 240;
@@ -14,9 +14,9 @@ const int CHECK_PIXEL_Y = 0;
 
 
 enum random_generator {
-    Standard, Halton, HaltonRandomDigit, HaltonOwen, Sobol
+    Standard, Halton, HaltonRandomDigit, HaltonOwen, Sobol, BlueNoise
 };
-const random_generator random_generator_type = Standard;
+const random_generator random_generator_type = BlueNoise;
 
 enum scrambling : int {
     RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
@@ -42,6 +42,7 @@ static const std::string random_generator_type_name =
         random_generator_type == Halton ? "Halton" :
         random_generator_type == HaltonRandomDigit ? "HaltonRandomDigit" :
         random_generator_type == HaltonOwen ? "HaltonOwen" :
+        random_generator_type == BlueNoise ? "BlueNoise" :
         random_generator_type == Sobol ? "Sobol" :
         "NewOne";
 static const std::string scrambling_type_name =
@@ -100,3 +101,20 @@ static std::vector<std::vector<uint32_t>> permutations_scrambling = {{1, 0},
 
 static const uint32_t primeNumbers[32] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
                                           67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131};
+
+
+enum struct SampleDimension : uint32_t {
+    ePixelX,
+    ePixelY,
+    eLightId,
+    eLightPointX,
+    eLightPointY,
+    eBSDF0,
+    eBSDF1,
+    eBSDF2,
+    eBSDF3,
+    eGetRayX,
+    eGetRayY,
+    eRussianRoulette,
+    eNUM_DIMENSIONS
+};

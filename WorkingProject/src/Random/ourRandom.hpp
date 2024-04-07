@@ -6,26 +6,11 @@
 #include "glm/glm.hpp"
 #include "../Constants.h"
 #include "Standard.h"
-#include "Sobol.h"
 #include "Halton.h"
+#include "BlueNoise.h"
+#include "Sobol.h"
 
 using namespace glm;
-
-enum struct SampleDimension : uint32_t {
-    ePixelX,
-    ePixelY,
-    eLightId,
-    eLightPointX,
-    eLightPointY,
-    eBSDF0,
-    eBSDF1,
-    eBSDF2,
-    eBSDF3,
-    eGetRayX,
-    eGetRayY,
-    eRussianRoulette,
-    eNUM_DIMENSIONS
-};
 
 struct SamplerState {
     uint32_t seed = 0;
@@ -74,6 +59,11 @@ float random(SamplerState &currentState) {
             result = HaltonOwenScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
                                           permutations_scrambling[base_index], OwenHashes[base_index]);
             break;
+        }
+        case BlueNoise: {
+            auto index = ((uint32_t) Dim * (uint32_t) SampleDimension::eNUM_DIMENSIONS + currentState.seed * MAX_PATHS +
+                          currentState.sampleIdx) % BlueNoisePoints.size();
+            result = index % 2 ? BlueNoisePoints[index].x : BlueNoisePoints[index].y;
         }
     }
 
