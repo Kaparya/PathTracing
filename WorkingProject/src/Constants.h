@@ -16,14 +16,14 @@ const int CHECK_PIXEL_Y = 0;
 enum random_generator {
     Standard, Halton, HaltonRandomDigit, HaltonOwen, Sobol
 };
-const random_generator random_generator_type = HaltonOwen;
+const random_generator random_generator_type = Standard;
 
 enum scrambling : int {
     RandomDigit, Owen, OwenV1, OwenV2, OwenFinal, None
 };
 const scrambling scrambling_type = None;
 
-const bool DebugOutput = true;
+const bool DebugOutput = false;
 
 
 
