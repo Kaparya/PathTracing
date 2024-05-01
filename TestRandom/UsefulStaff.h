@@ -1,5 +1,6 @@
 #pragma once
 
+uint32_t BLUE_NOISE_TEXTURE_SIZE = 128;
 const int MAX_BOUNCE = 8;
 size_t MAX_PATHS = 0;
 
