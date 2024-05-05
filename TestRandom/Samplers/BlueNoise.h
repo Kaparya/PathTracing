@@ -103,4 +103,13 @@ void BlueNoiseGenerate(uint32_t seed) {
     system("python3 ../GraphBuilder/main.py");
 }
 
+float BlueNoiseRand(SamplerState &currentState, uint32_t Dim) {
+    float result;
+    size_t index = currentState.depth * 12213347 + currentState.seed + currentState.sampleIdx + Dim * 94121;
+    result = blue_noise_texture[index / BLUE_NOISE_TEXTURE_SIZE % BLUE_NOISE_TEXTURE_SIZE][index %
+                                                                                           BLUE_NOISE_TEXTURE_SIZE];
+
+    return result;
+}
+
 #endif
