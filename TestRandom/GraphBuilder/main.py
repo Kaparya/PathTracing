@@ -18,11 +18,11 @@ def plotFFT(pattern):
                        vmin=-4, vmax=1)
     fig.colorbar(im, ax=axs[2], fraction=0.046, pad=0.04)
     plt.savefig('../Results/BlueNoiseTexture.png', bbox_inches='tight')
-    plt.show()
+    # plt.show()
 
 
 data = np.zeros((128, 128), dtype=np.float32)
-input_file = open("data.txt", "r")
+input_file = open("../GraphBuilder/data.txt", "r")
 line_index = 0
 for line in input_file:
 
