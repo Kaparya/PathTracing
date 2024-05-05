@@ -24,7 +24,7 @@ int main() {
     std::cout << "Started\n";
 
     if (random_generator_type == BlueNoise) {
-        BlueNoiseGenerate();
+        BlueNoiseGenerate(12);
     }
 
     std::string modelPath = "../assets/CornellBox-Original.obj";

@@ -3,64 +3,113 @@
 
 #include "../Constants.h"
 
+#include <algorithm>
+//#include <fstream>
+#include <iomanip>
+
+uint32_t BLUE_NOISE_TEXTURE_SIZE = 128;
+
 struct Point2F {
-    float x = 0, y = 0;
+    int x = 0, y = 0;
+};
+struct Node {
+    unsigned long long energy = ULLONG_MAX;
+    Point2F point;
 };
 
-inline static float PointDistance(Point2F lhs, Point2F rhs) {
+std::vector<std::vector<float>> blue_noise_texture(BLUE_NOISE_TEXTURE_SIZE,
+                                                   std::vector<float>(BLUE_NOISE_TEXTURE_SIZE, 0));
+std::vector<std::vector<unsigned long long>> energy_mask(BLUE_NOISE_TEXTURE_SIZE,
+                                                         std::vector<unsigned long long>(BLUE_NOISE_TEXTURE_SIZE, 0));
 
-    float x_delta = lhs.x - rhs.x;
-    float y_delta = lhs.y - rhs.y;
+void PaintAround(Point2F point) {
 
-    if (x_delta > 0.5f) {
-        x_delta = 1 - x_delta;
+    energy_mask[point.x][point.y] = ULLONG_MAX;
+    const int delta = BLUE_NOISE_TEXTURE_SIZE / 2 - 8;
+    for (int delta_x = -delta; delta_x <= delta; ++delta_x) {
+        int current_x = (point.x + delta_x + BLUE_NOISE_TEXTURE_SIZE) % BLUE_NOISE_TEXTURE_SIZE;
+        for (int delta_y = -delta; delta_y <= delta; ++delta_y) {
+            if (delta_x == 0 && delta_y == 0) {
+                continue;
+            }
+            int current_y = (point.y + delta_y + BLUE_NOISE_TEXTURE_SIZE) % BLUE_NOISE_TEXTURE_SIZE;
+            double energy_value = delta - std::sqrt(abs(delta_x) * abs(delta_x) + abs(delta_y) * abs(delta_y));
+            if (energy_value <= 0) {
+                continue;
+            }
+            energy_value = energy_value / delta * 128;
+            energy_value = energy_value * energy_value;
+            if (energy_mask[current_x][current_y] != ULLONG_MAX) {
+                energy_mask[current_x][current_y] += energy_value;
+            }
+        }
     }
-    if (y_delta > 0.5f) {
-        y_delta = 1 - y_delta;
-    }
 
-    return std::sqrt(x_delta * x_delta + y_delta * y_delta);
 }
 
-std::vector<Point2F> BlueNoisePoints(MAX_PATHS * (uint32_t)SampleDimension::eNUM_DIMENSIONS);
+// Jax Void and cluster algorithm
+void BlueNoiseGenerate(uint32_t seed) {
 
-// Mitchell's Best Candidate Algorithm
-// https://blog.demofox.org/2017/10/20/generating-blue-noise-sample-points-with-mitchells-best-candidate-algorithm/
-void BlueNoiseGenerate() {
-
-    size_t samples_number = BlueNoisePoints.size();
-    uint32_t seed = 11;
-    uint32_t base = 3;
+    uint32_t not_used_number = BLUE_NOISE_TEXTURE_SIZE * BLUE_NOISE_TEXTURE_SIZE;
 
     std::mt19937 rng(seed);
-    std::uniform_real_distribution<float> distribution(0, 1);
+    std::uniform_int_distribution<int> distribution(0, BLUE_NOISE_TEXTURE_SIZE - 1);
 
-    BlueNoisePoints[0] = {distribution(rng), distribution(rng)}; // first point
+    double point_index = 0;
+    for (uint32_t index = 0; index < 16; ++index) {
+        Point2F point = {distribution(rng), distribution(rng)};
+        blue_noise_texture[point.x][point.y] = point_index / (BLUE_NOISE_TEXTURE_SIZE * BLUE_NOISE_TEXTURE_SIZE);
+        point_index++;
+        PaintAround(point);
+        --not_used_number;
+    }
 
-    std::cout << "\n";
-    for (size_t sample = 1; sample < samples_number; ++sample) {
-        std::cerr << "\r Generating points left: " << samples_number - sample << "        ";
-        Point2F best_point;
-        float max_distance = -1;
+    while (not_used_number) {
 
-        for (size_t current_test = 0; current_test < base * sample; ++current_test) {
-
-            Point2F test_point({distribution(rng), distribution(rng)});
-            float distance = 3;
-
-            for (size_t index = 0; index < sample; ++index) {
-                distance = std::min(distance, PointDistance(BlueNoisePoints[index], test_point));
-            }
-
-            if (distance > max_distance) {
-                max_distance = distance;
-                best_point = test_point;
+        Node current;
+        for (int i = 0; i < BLUE_NOISE_TEXTURE_SIZE; ++i) {
+            for (int j = 0; j < BLUE_NOISE_TEXTURE_SIZE; ++j) {
+                if (current.energy > energy_mask[i][j]) {
+                    current.energy = energy_mask[i][j];
+                    current.point = {i, j};
+                }
             }
         }
 
-        BlueNoisePoints[sample] = best_point;
+        blue_noise_texture[current.point.x][current.point.y] =
+                point_index / (BLUE_NOISE_TEXTURE_SIZE * BLUE_NOISE_TEXTURE_SIZE);
+        point_index++;
 
+        PaintAround(current.point);
+        --not_used_number;
     }
+
+//    std::ofstream raw_output("../GraphBuilder/data.txt");
+//    raw_output << std::fixed << std::setprecision(6);
+//    std::ofstream raw_output_mask("../GraphBuilder/mask.txt");
+//    for (uint32_t index = 0; index < BLUE_NOISE_TEXTURE_SIZE * BLUE_NOISE_TEXTURE_SIZE; ++index) {
+//        if (index % BLUE_NOISE_TEXTURE_SIZE == 0 && index != 0) {
+//            raw_output << '\n';
+//            raw_output_mask << '\n';
+//        }
+//        raw_output << blue_noise_texture[index / BLUE_NOISE_TEXTURE_SIZE][index % BLUE_NOISE_TEXTURE_SIZE] << ' ';
+//        raw_output_mask << std::setw(15)
+//                        << energy_mask[index / BLUE_NOISE_TEXTURE_SIZE][index % BLUE_NOISE_TEXTURE_SIZE]
+//                        << ' ';
+//    }
+//    raw_output_mask.close();
+//    raw_output.close();
+
+    // system("python3 ../GraphBuilder/main.py");
+}
+
+float BlueNoiseRand(SamplerState &currentState, uint32_t Dim) {
+    float result;
+    size_t index = currentState.depth * 12213347 + currentState.seed + currentState.sampleIdx + Dim * 94121;
+    result = blue_noise_texture[index / BLUE_NOISE_TEXTURE_SIZE % BLUE_NOISE_TEXTURE_SIZE][index %
+                                                                                           BLUE_NOISE_TEXTURE_SIZE];
+
+    return result;
 }
 
 #endif

@@ -1,7 +1,7 @@
 #pragma once
 
-const int MAX_PATHS = 256;
-const int MAX_BOUNCE = 8;
+const int MAX_PATHS = 8;
+const int MAX_BOUNCE = 4;
 
 const int IMAGE_WIDTH = 320;
 const int IMAGE_HEIGHT = 240;
@@ -23,7 +23,7 @@ enum scrambling : int {
 };
 const scrambling scrambling_type = None;
 
-const bool DebugOutput = false;
+const bool DebugOutput = true;
 
 
 
@@ -118,3 +118,16 @@ enum struct SampleDimension : uint32_t {
     eRussianRoulette,
     eNUM_DIMENSIONS
 };
+
+struct SamplerState {
+    uint32_t seed = 0;
+    uint32_t sampleIdx = 0;
+    uint32_t depth = 0;
+};
+
+inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixelSampleIndex) {
+    SamplerState sampler;
+    sampler.seed = SEED + linearPixelIndex;
+    sampler.sampleIdx = pixelSampleIndex;
+    return sampler;
+}

@@ -1,10 +1,6 @@
 #ifndef BLUENOISE_H
 #define BLUENOISE_H
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-
-#include "../../My project/src/AdditionalLibraries/stb_image_writer.h"
-
 #include <algorithm>
 #include <fstream>
 #include <iomanip>

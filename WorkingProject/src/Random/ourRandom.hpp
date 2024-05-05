@@ -12,19 +12,6 @@
 
 using namespace glm;
 
-struct SamplerState {
-    uint32_t seed = 0;
-    uint32_t sampleIdx = 0;
-    uint32_t depth = 0;
-};
-
-inline static SamplerState initSampler(uint32_t linearPixelIndex, uint32_t pixelSampleIndex) {
-    SamplerState sampler;
-    sampler.seed = SEED + linearPixelIndex;
-    sampler.sampleIdx = pixelSampleIndex;
-    return sampler;
-}
-
 static const std::vector<uint32_t> OwenHashes = {0xb694b1f4, 0x7eb7d41c, 0x8bf4251c, 0xf0ea7299, 0xc551ce33,
                                                  0xe75d6a6b, 0xd239f9f0, 0xcc2775fd, 0x6713db31, 0x41ecec7,
                                                  0xae553148, 0xe17f90cd, 0xe720c4d5, 0xe697db5b, 0x1296bb16,
@@ -61,9 +48,7 @@ float random(SamplerState &currentState) {
             break;
         }
         case BlueNoise: {
-            auto index = ((uint32_t) Dim * (uint32_t) SampleDimension::eNUM_DIMENSIONS + currentState.seed * MAX_PATHS +
-                          currentState.sampleIdx) % BlueNoisePoints.size();
-            result = index % 2 ? BlueNoisePoints[index].x : BlueNoisePoints[index].y;
+            result = BlueNoiseRand(currentState, (uint32_t)Dim);
         }
     }
 
@@ -119,6 +104,11 @@ float random(SamplerState &currentState) {
                 }
                 case Sobol: {
                     static std::ofstream allRandom("../allRandomSobol.txt");
+                    allRandom << result << '\n';
+                    break;
+                }
+                case BlueNoise: {
+                    static std::ofstream allRandom("../allRandomBlueNoise.txt");
                     allRandom << result << '\n';
                     break;
                 }
