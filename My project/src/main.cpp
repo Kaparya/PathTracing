@@ -4,30 +4,41 @@
 #include "GeometryObjects/hittable_list.h"
 #include "SceneReader.h"
 
+#include "Random/BlueNoise.h"
+
 int main() {
 
     our_clock.start();
 
-    current_folder = "../Assets/CornellBox/";
-    obj_file = "CornellBox-Original.obj";
+    BlueNoiseGenerate(MAX_SAMPLES + MAX_BOUNCE);
+
+//    current_folder = "../Assets/CornellBox/";
+//    obj_file = "CornellBox-Original.obj";
+//    SCENE_NAME = "cornell_box_original_";
 
 //    current_folder = "../Assets/CornellBoxMod/";
 //    obj_file = "CornellBox-Mod.obj";
+//    SCENE_NAME = "cornell_box_mod_";
 
 //    current_folder = "../Assets/Cubes/";
 //    obj_file = "cubes.obj";
+//    SCENE_NAME = "cubes_";
 
 //    current_folder = "../Assets/Scene/";
 //    obj_file = "scene.obj";
+//    SCENE_NAME = "scene_";
 
 //    current_folder = "../Assets/TestNormals/";
 //    obj_file = "sphere.obj";
+//    SCENE_NAME = "sphere_";
 
-//    current_folder = "../Assets/Wolf/";
-//    obj_file = "wolf.obj";
+    current_folder = "../Assets/Wolf/";
+    obj_file = "wolf.obj";
+    SCENE_NAME = "wolf_";
 
 //    current_folder = "../Assets/Wolf/";
 //    obj_file = "wolf_smooth.obj";
+//    SCENE_NAME = "wolf_smooth_";
 
     hittable_list world;
     ReadScene(world);
@@ -35,10 +46,9 @@ int main() {
     camera cam;
 
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 640;
-    cam.samples_per_pixel = 10;
-    cam.max_bounce = 10;
-    MAX_BOUNCE = cam.max_bounce;
+    cam.image_width = IMAGE_WIDTH;
+    cam.samples_per_pixel = MAX_SAMPLES;
+    cam.max_bounce = MAX_BOUNCE;
     cam.seed = 0;
 
     {

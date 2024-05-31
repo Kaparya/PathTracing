@@ -10,7 +10,19 @@
 
 // Constants
 
-int MAX_BOUNCE;
+std::string RANDOM_TYPE;
+std::string SCENE_NAME;
+
+const int MAX_SAMPLES = 512;
+const int MAX_BOUNCE = 64;
+
+const int IMAGE_WIDTH = 640;
+const int IMAGE_HEIGHT = 360;
+
+const size_t BLUE_NOISE_TEXTURE_SIZE = 128;
+std::vector<std::vector<float>> blue_noise_texture(BLUE_NOISE_TEXTURE_SIZE,
+                                                   std::vector<float>(BLUE_NOISE_TEXTURE_SIZE, 0));
+
 std::string current_folder = "../Assets/CornellBox/";
 std::string obj_file = "CornellBox-Original.obj";
 

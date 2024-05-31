@@ -11,6 +11,8 @@
 #include "GeometryObjects/hittable_list.h"
 #include "GeometryObjects/triangle.h"
 
+#include "objects/sampler_state.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "AdditionalLibraries/stb_image_writer.h"
@@ -21,7 +23,7 @@ public:
     int image_width = 100;  // Rendered image width in pixel count
     int samples_per_pixel = 50;   // Count of random samples for each pixel
     int max_bounce = 20;
-    int seed = 10;
+    int seed = MAX_SAMPLES + MAX_BOUNCE;
 
     double vertical_fov = 90; // Degrees
     point3 look_from = point3(0, 0, -1);
@@ -77,12 +79,22 @@ public:
             }
         }
 
+#ifdef SAVE_RENDERED_IMAGE
         our_clock.finish();
-        rendered_image_file_ += " [" + std::to_string(our_clock.result()) + " " + our_clock.clock_measure + "].png";
+        rendered_image_file_ = "../Results/";
+        rendered_image_file_ += RANDOM_TYPE + '/';
+
+        rendered_image_file_ += SCENE_NAME;
+
+        rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
+
+        std::string time_str = std::to_string(our_clock.result());
+        size_t point = time_str.find('.');
+        time_str.erase(point + 4, time_str.size() - point + 4);
+        rendered_image_file_ += " " + RANDOM_TYPE + " [" + time_str + " " + our_clock.clock_measure + "].png";
 
         std::clog << "\rDone!                        \n" << std::flush;
 
-#ifdef SAVE_RENDERED_IMAGE
         stbi_write_png(rendered_image_file_.c_str(), image_width, image_height_, 4, pixels.data(), 0);
 #endif
     }
@@ -101,12 +113,6 @@ private:
     point3 center;         // Camera center
 
     void initialize() {
-
-        // Initialising saving file
-        int file_index = 22;
-        rendered_image_file_ = "../Results/test";
-        rendered_image_file_ += std::to_string(file_index) + '_';
-        rendered_image_file_ += std::to_string(samples_per_pixel) + '_' + std::to_string(max_bounce);
 
         image_height_ = static_cast<int>(image_width / aspect_ratio);
         image_height_ = (image_height_ < 1) ? 1 : image_height_;
