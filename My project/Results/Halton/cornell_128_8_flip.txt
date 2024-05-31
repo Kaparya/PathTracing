@@ -1,0 +1,6 @@
+Mean: 0.321130
+Weighted median: 0.350763
+1st weighted quartile: 0.319369
+3rd weighted quartile: 0.419772
+Min: 0.028302
+Max: 0.991815

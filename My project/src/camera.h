@@ -91,7 +91,7 @@ public:
         std::string time_str = std::to_string(our_clock.result());
         size_t point = time_str.find('.');
         time_str.erase(point + 4, time_str.size() - point + 4);
-        rendered_image_file_ += " " + RANDOM_TYPE + " [" + time_str + " " + our_clock.clock_measure + "].png";
+        rendered_image_file_ += "_" + RANDOM_TYPE + "[" + time_str + our_clock.clock_measure + "].png";
 
         std::clog << "\rDone!                        \n" << std::flush;
 
