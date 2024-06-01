@@ -1,6 +1,8 @@
 #ifndef BLUENOISE_H
 #define BLUENOISE_H
 
+#include "../UsefulThings.h"
+
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
@@ -12,7 +14,6 @@ struct Node {
     unsigned long long energy = ULLONG_MAX;
     Point2F point;
 };
-
 std::vector<std::vector<float>> blue_noise_texture(BLUE_NOISE_TEXTURE_SIZE,
                                                    std::vector<float>(BLUE_NOISE_TEXTURE_SIZE, 0));
 std::vector<std::vector<unsigned long long>> energy_mask(BLUE_NOISE_TEXTURE_SIZE,
@@ -95,16 +96,14 @@ void BlueNoiseGenerate(uint32_t seed) {
     }
     raw_output_mask.close();
     raw_output.close();
-
-    system("python3 ../GraphBuilder/main.py");
 }
 
-float BlueNoiseRand(SamplerState &currentState, uint32_t Dim) {
-    float result;
-    size_t index = currentState.depth * 12213347 + currentState.seed + currentState.sampleIdx + Dim * 94121;
-    result = blue_noise_texture[index / BLUE_NOISE_TEXTURE_SIZE % BLUE_NOISE_TEXTURE_SIZE][index %
-                                                                                           BLUE_NOISE_TEXTURE_SIZE];
-
+float BlueNoiseRand(const SamplerState& currentState, uint32_t Dim) {
+    size_t y = currentState.seed / IMAGE_WIDTH;
+    size_t x = currentState.seed % IMAGE_WIDTH;
+    size_t row = (y + (uint32_t)Dim * 100937 + currentState.sampleIdx * 1091 + currentState.depth * 133337) % blue_noise_texture.size();
+    size_t column = (x + (uint32_t)Dim * 99523 + currentState.sampleIdx * 2399 + currentState.depth * 133337) % blue_noise_texture.size();
+    float result = blue_noise_texture[row][column];
     return result;
 }
 

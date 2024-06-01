@@ -1,6 +1,7 @@
 #ifndef BLUENOISE_H
 #define BLUENOISE_H
 
+#include "../precalculated_data.h"
 #include "../UsefulThings.h"
 
 #include <algorithm>

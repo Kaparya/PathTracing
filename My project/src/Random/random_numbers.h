@@ -1,7 +1,7 @@
 #ifndef RANDOM_NUMBERS_H
 #define RANDOM_NUMBERS_H
 
-#define STANDARD
+#define BLUE_NOISE
 
 #include "../objects/sample_dimension.h"
 #include "../objects/sampler_state.h"

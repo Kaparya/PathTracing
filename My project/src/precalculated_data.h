@@ -3,6 +3,10 @@
 
 #include <vector>
 
+const size_t BLUE_NOISE_TEXTURE_SIZE = 128;
+std::vector<std::vector<float>> blue_noise_texture(BLUE_NOISE_TEXTURE_SIZE,
+                                                   std::vector<float>(BLUE_NOISE_TEXTURE_SIZE, 0));
+
 static std::vector<std::vector<uint32_t>> permutations_scrambling = {{1,   0},
                                                                      {2,   0,   1},
                                                                      {1,   0,   4,   3,   2},

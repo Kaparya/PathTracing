@@ -1,8 +1,11 @@
 #pragma once
 
+const uint32_t IMAGE_WIDTH = 320;
+const uint32_t IMAGE_HEIGHT = 240;
+
 uint32_t BLUE_NOISE_TEXTURE_SIZE = 128;
 const int MAX_BOUNCE = 8;
-size_t MAX_PATHS = 0;
+size_t MAX_SAMPLES = 0;
 
 const float EPSILON = 1e-7;
 

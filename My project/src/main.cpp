@@ -16,9 +16,9 @@ int main() {
 //    obj_file = "CornellBox-Original.obj";
 //    SCENE_NAME = "cornell_box_original_";
 
-//    current_folder = "../Assets/CornellBoxMod/";
-//    obj_file = "CornellBox-Mod.obj";
-//    SCENE_NAME = "cornell_box_mod_";
+    current_folder = "../Assets/CornellBoxMod/";
+    obj_file = "CornellBox-Mod.obj";
+    SCENE_NAME = "cornell_box_mod_";
 
 //    current_folder = "../Assets/Cubes/";
 //    obj_file = "cubes.obj";
@@ -32,9 +32,9 @@ int main() {
 //    obj_file = "sphere.obj";
 //    SCENE_NAME = "sphere_";
 
-    current_folder = "../Assets/Wolf/";
-    obj_file = "wolf.obj";
-    SCENE_NAME = "wolf_";
+//    current_folder = "../Assets/Wolf/";
+//    obj_file = "wolf.obj";
+//    SCENE_NAME = "wolf_";
 
 //    current_folder = "../Assets/Wolf/";
 //    obj_file = "wolf_smooth.obj";

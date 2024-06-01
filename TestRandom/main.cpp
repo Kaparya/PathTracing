@@ -4,18 +4,15 @@
 #include <random>
 #include <bitset>
 
-#include "UsefulStaff.h"
+#include "UsefulThings.h"
 
 #include "Samplers/Standard.h"
 #include "Samplers/Halton.h"
 #include "Samplers/BlueNoise.h"
 
-const uint32_t SCREEN_WIDTH = 320;
-const uint32_t SCREEN_HEIGHT = 240;
+float random(SamplerState &state, Generator generator, uint32_t Dim) {
 
-float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
-
-    const uint32_t dimension = uint32_t(Dim) + currentState.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
+    const uint32_t dimension = uint32_t(Dim) + state.depth * uint32_t(SampleDimension::eNUM_DIMENSIONS);
     const uint32_t base_index = dimension & 31u;
     const uint32_t base = primeNumbers[base_index];
 
@@ -26,21 +23,25 @@ float random(SamplerState &currentState, Generator generator, uint32_t Dim) {
             break;
         }
         case Generator::Halton: {
-            result = HaltonRand(currentState.seed * MAX_PATHS + currentState.sampleIdx, base);
+            result = HaltonRand((state.seed * MAX_SAMPLES * 94281923 + state.sampleIdx * 131861) %
+                                (IMAGE_HEIGHT * IMAGE_WIDTH * MAX_SAMPLES * MAX_BOUNCE), base);
             break;
         }
         case Generator::HaltonRandomDigit: {
-            result = HaltonRandomDigitScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
+            result = HaltonRandomDigitScrambling((state.seed * MAX_SAMPLES * 94281923 + state.sampleIdx * 131861) %
+                                                 (IMAGE_HEIGHT * IMAGE_WIDTH * MAX_SAMPLES * MAX_BOUNCE), base,
                                                  permutations_scrambling[base_index]);
             break;
         }
         case Generator::HaltonOwen: {
-            result = HaltonOwenScrambling(currentState.seed * MAX_PATHS + currentState.sampleIdx, base,
-                                          permutations_scrambling[base_index], OwenHashes[base_index]);
+            result = HaltonOwenScrambling((state.seed * MAX_SAMPLES * 94281923 + state.sampleIdx * 131861) %
+                                          (IMAGE_HEIGHT * IMAGE_WIDTH * MAX_SAMPLES * MAX_BOUNCE), base,
+                                          permutations_scrambling[base_index],
+                                          OwenHashes[base_index]);
             break;
         }
         case Generator::BlueNoise: {
-            result = BlueNoiseRand(currentState, Dim);
+            result = BlueNoiseRand(state, (uint32_t)Dim);
         }
     }
 
@@ -54,10 +55,10 @@ int main() {
     size_t number_of_pixels;
     std::cout << "Input the number of points / generator type / number of pixels to test:\n";
     std::cin >> number_of_points;
-    MAX_PATHS = number_of_points;
+    MAX_SAMPLES = number_of_points;
     BlueNoiseGenerate(12);
     generator_input = 4;
-//    std::cin >> generator_input;
+    std::cin >> generator_input;
     number_of_pixels = 4;
 //    std::cin >> number_of_pixels;
     Generator generator;
@@ -93,10 +94,10 @@ int main() {
     output << number_of_pixels << ' ' << (uint32_t) SampleDimension::eNUM_DIMENSIONS << '\n';
 
     for (auto pixel = 0; pixel < number_of_pixels; ++pixel) {
-        uint32_t seed = ((SCREEN_WIDTH * SCREEN_HEIGHT) / number_of_pixels) * pixel +
-                        rand() % ((SCREEN_WIDTH * SCREEN_HEIGHT) / number_of_pixels);
+        uint32_t seed = ((IMAGE_WIDTH * IMAGE_HEIGHT) / number_of_pixels) * pixel +
+                        rand() % ((IMAGE_WIDTH * IMAGE_HEIGHT) / number_of_pixels);
 //        uint32_t seed = 0;
-        output << seed / SCREEN_WIDTH << ' ' << seed % SCREEN_WIDTH << '\n';
+        output << seed / IMAGE_WIDTH << ' ' << seed % IMAGE_WIDTH << '\n';
         for (uint32_t dimension = 0; dimension < (uint32_t) SampleDimension::eNUM_DIMENSIONS; ++dimension) {
             output << std::setw(11) << dimension;
         }
