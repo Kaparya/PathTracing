@@ -12,13 +12,13 @@ int main() {
 
     BlueNoiseGenerate(MAX_SAMPLES + MAX_BOUNCE);
 
-//    current_folder = "../Assets/CornellBox/";
-//    obj_file = "CornellBox-Original.obj";
-//    SCENE_NAME = "cornell_box_original_";
+    current_folder = "../Assets/CornellBox/";
+    obj_file = "CornellBox-Original.obj";
+    SCENE_NAME = "cornell_box_original_";
 
-    current_folder = "../Assets/CornellBoxMod/";
-    obj_file = "CornellBox-Mod.obj";
-    SCENE_NAME = "cornell_box_mod_";
+//    current_folder = "../Assets/CornellBoxMod/";
+//    obj_file = "CornellBox-Mod.obj";
+//    SCENE_NAME = "cornell_box_mod_";
 
 //    current_folder = "../Assets/Cubes/";
 //    obj_file = "cubes.obj";
