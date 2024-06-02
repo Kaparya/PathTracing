@@ -97,13 +97,14 @@ void BlueNoiseGenerate(uint32_t seed) {
     raw_output.close();
 }
 
-float BlueNoiseRand(const SamplerState& currentState, uint32_t Dim) {
+float BlueNoiseRand(const SamplerState &currentState, uint32_t Dim) {
     size_t y = currentState.seed / IMAGE_WIDTH;
     size_t x = currentState.seed % IMAGE_WIDTH;
-    size_t row = (y + (uint32_t)Dim * 100937 + currentState.sampleIdx * 1091 + currentState.depth * 133337) % blue_noise_texture.size();
-    size_t column = (x + (uint32_t)Dim * 99523 + currentState.sampleIdx * 2399 + currentState.depth * 133337) % blue_noise_texture.size();
-    float result = blue_noise_texture[row][column];
-    return result;
+    size_t row = (y + (uint32_t) Dim * 100937 + currentState.sampleIdx * 1091 + currentState.depth * 133337) %
+                 blue_noise_texture.size();
+    size_t column = (x + (uint32_t) Dim * 99523 + currentState.sampleIdx * 2399 + currentState.depth * 133337) %
+                    blue_noise_texture[0].size();
+    return blue_noise_texture[row][column];
 }
 
 #endif

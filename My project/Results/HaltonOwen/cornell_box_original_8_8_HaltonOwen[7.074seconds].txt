@@ -1,0 +1,1 @@
+Mean squared error: 99.548095

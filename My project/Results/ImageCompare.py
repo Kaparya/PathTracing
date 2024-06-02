@@ -3,10 +3,12 @@ import sys
 import numpy as np
 import cv2
 
+
 def MSE(original, ours):
     error = np.sum((original.astype("float") - ours.astype("float")) ** 2)
     error /= original.shape[0] * original.shape[1]
     return error
+
 
 original_path = sys.argv[1]
 original = cv2.imread(original_path, cv2.IMREAD_UNCHANGED)

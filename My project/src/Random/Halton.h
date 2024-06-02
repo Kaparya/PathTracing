@@ -16,7 +16,7 @@ static float HaltonRand(uint32_t value, const uint32_t base) {
         value = next;
     }
 
-    return result;
+    return std::max(std::min(result, 1.f - EPSILON), 0.f);
 }
 
 static float HaltonRandomDigitScrambling(uint32_t value, const uint32_t base,
@@ -46,7 +46,6 @@ namespace {
         key ^= (key >> 17);
         key *= 0x1a85ec53;
         key ^= (key >> 17);
-
         return key;
     }
 };
