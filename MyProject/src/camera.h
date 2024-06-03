@@ -94,7 +94,7 @@ public:
         rendered_image_file_ += "_" + RANDOM_TYPE + "[" + time_str + our_clock.clock_measure + "].png";
 
         std::clog << "\rDone!                        \n";
-        std::clog << "Image saved to " << rendered_image_file_ << std::flush;
+        std::clog << "Image saved to " << rendered_image_file_ << "\n\n\n\n" << std::flush;
 
         stbi_write_png(rendered_image_file_.c_str(), image_width, image_height_, 4, pixels.data(), 0);
 #endif
