@@ -13,13 +13,14 @@
 std::string RANDOM_TYPE;
 std::string SCENE_NAME;
 
-const int MAX_SAMPLES = 8;
-const int MAX_BOUNCE = 8;
+int MAX_SAMPLES = 8;
+int MAX_BOUNCE = 8;
 
 const int IMAGE_WIDTH = 640;
 const int IMAGE_HEIGHT = 360;
 
-std::string current_folder = "../Assets/CornellBox/";
+const std::string PROJECT_PATH = "PathTracing/MyProject/";
+std::string current_folder = PROJECT_PATH + "Assets/CornellBox/";
 std::string obj_file = "CornellBox-Original.obj";
 
 #define SAVE_RENDERED_IMAGE

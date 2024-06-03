@@ -81,7 +81,7 @@ public:
 
 #ifdef SAVE_RENDERED_IMAGE
         our_clock.finish();
-        rendered_image_file_ = "../Results/";
+        rendered_image_file_ = PROJECT_PATH + "Results/";
         rendered_image_file_ += RANDOM_TYPE + '/';
 
         rendered_image_file_ += SCENE_NAME;
@@ -93,7 +93,8 @@ public:
         time_str.erase(point + 4, time_str.size() - point + 4);
         rendered_image_file_ += "_" + RANDOM_TYPE + "[" + time_str + our_clock.clock_measure + "].png";
 
-        std::clog << "\rDone!                        \n" << std::flush;
+        std::clog << "\rDone!                        \n";
+        std::clog << "Image saved to " << rendered_image_file_ << std::flush;
 
         stbi_write_png(rendered_image_file_.c_str(), image_width, image_height_, 4, pixels.data(), 0);
 #endif
