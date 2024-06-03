@@ -1,8 +1,14 @@
 
 .idea/
+.venv/
 
 # Cmake build files
 cmake-build-debug/
 cmake-build-release/
 
 DimensionsTest/
+WorkingProject/
+
+CompareDefaultGenerators.pdf
+
+Курсовая работа.docx
