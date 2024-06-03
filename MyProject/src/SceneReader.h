@@ -128,9 +128,9 @@ bool ReadScene(hittable_list &world) {
 
         if (sceneIndex == 0) { // Cornell
             world.addLight(std::make_shared<PointLight>(point3(0, 9.5, 0), color(0.75, 0.75, 0.75), 20));
-        } else if (sceneIndex == 2) {
+        } else if (sceneIndex == 1) {
             world.addLight(std::make_shared<PointLight>(point3(0, 5, 0), color(1, 1, 1), 50));
-        } else if (sceneIndex <= 4) { // Wolf
+        } else if (sceneIndex <= 3) { // Wolf
             world.addLight(std::make_shared<PointLight>(point3(3.29, 2.29, 4.88), color(1, 1, 1), 100));
             world.addLight(std::make_shared<PointLight>(point3(3.29, -3.66, 4.88), color(1, 1, 1), 100));
         }
