@@ -23,11 +23,11 @@ const int IMAGE_WIDTH = 640;
 const int IMAGE_HEIGHT = 360;
 
 // Correct path for CLion build
-//const std::string PROJECT_PATH = "../";
+const std::string PROJECT_PATH = "../";
 
 // If you ran with .exe file, then change this path
 // to the path from your user, to PathTracing/MyProject directory
-const std::string PROJECT_PATH = "PathTracing/MyProject/";
+// const std::string PROJECT_PATH = "PathTracing/MyProject/";
 
 std::string current_folder = PROJECT_PATH + "Assets/CornellBox/";
 std::string obj_file = "CornellBox-Original.obj";
