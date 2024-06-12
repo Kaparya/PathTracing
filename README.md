@@ -15,8 +15,8 @@
    - [Запуск MyProject](#Запуск-MyProject)
 2. [TestRandom](#TestRandom)
 3. [MakeScatterForPixel](#MakeScatterForPixel)
-4. [Coursework.pdf](#Coursework.pdf)
-5. [Presentation.pdf](#Presentation.pdf)
+4. [Coursework](#Coursework)
+5. [Presentation](#Presentation)
 
 ---
 
@@ -132,10 +132,10 @@ cmake --build build
 
 ---
 
-## Coursework.pdf 
+## Coursework
 
 Это текст курсовой работы
 
-## Presentation.pdf 
+## Presentation
 
 Презентация для защиты курсовой работы
