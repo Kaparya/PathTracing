@@ -11,7 +11,7 @@
 
 1. [MyProject](#MyProject)
    - [Описание](#Описание)
-   - [Рендеринг изображений](#Рендеринг-изображений)]
+   - [Рендеринг изображений](#Рендеринг-изображений)
    - [Запуск MyProject](#Запуск-MyProject)
 2. [TestRandom](#TestRandom)
 3. [MakeScatterForPixel](#MakeScatterForPixel)
